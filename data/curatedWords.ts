@@ -15,23 +15,78 @@ export const CURATED_WORDS: Record<string, PhonicsBlock[]> = {
     { text: 'a', type: 'short_vowel', soundRule: 'Short Vowel', phoneme: 'æ' },
     { text: 't', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 't' },
   ],
+  mat: [
+    { text: 'm', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 'm' },
+    { text: 'a', type: 'short_vowel', soundRule: 'Short Vowel', phoneme: 'æ' },
+    { text: 't', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 't' },
+  ],
+  had: [
+    { text: 'h', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 'h' },
+    { text: 'a', type: 'short_vowel', soundRule: 'Short Vowel', phoneme: 'æ' },
+    { text: 'd', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 'd' },
+  ],
   dog: [
     { text: 'd', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 'd' },
     { text: 'o', type: 'short_vowel', soundRule: 'Short Vowel', phoneme: 'ɒ' },
     { text: 'g', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 'g' },
+  ],
+  hot: [
+    { text: 'h', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 'h' },
+    { text: 'o', type: 'short_vowel', soundRule: 'Short Vowel', phoneme: 'ɒ' },
+    { text: 't', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 't' },
+  ],
+  top: [
+    { text: 't', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 't' },
+    { text: 'o', type: 'short_vowel', soundRule: 'Short Vowel', phoneme: 'ɒ' },
+    { text: 'p', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 'p' },
   ],
   sun: [
     { text: 's', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 's' },
     { text: 'u', type: 'short_vowel', soundRule: 'Short Vowel', phoneme: 'ʌ' },
     { text: 'n', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 'n' },
   ],
+  bus: [
+    { text: 'b', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 'b' },
+    { text: 'u', type: 'short_vowel', soundRule: 'Short Vowel', phoneme: 'ʌ' },
+    { text: 's', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 's' },
+  ],
+  cup: [
+    { text: 'c', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 'k' },
+    { text: 'u', type: 'short_vowel', soundRule: 'Short Vowel', phoneme: 'ʌ' },
+    { text: 'p', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 'p' },
+  ],
   pig: [
     { text: 'p', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 'p' },
     { text: 'i', type: 'short_vowel', soundRule: 'Short Vowel', phoneme: 'ɪ' },
     { text: 'g', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 'g' },
   ],
+  sit: [
+    { text: 's', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 's' },
+    { text: 'i', type: 'short_vowel', soundRule: 'Short Vowel', phoneme: 'ɪ' },
+    { text: 't', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 't' },
+  ],
+  big: [
+    { text: 'b', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 'b' },
+    { text: 'i', type: 'short_vowel', soundRule: 'Short Vowel', phoneme: 'ɪ' },
+    { text: 'g', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 'g' },
+  ],
   bed: [
     { text: 'b', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 'b' },
+    { text: 'e', type: 'short_vowel', soundRule: 'Short Vowel', phoneme: 'ɛ' },
+    { text: 'd', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 'd' },
+  ],
+  pen: [
+    { text: 'p', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 'p' },
+    { text: 'e', type: 'short_vowel', soundRule: 'Short Vowel', phoneme: 'ɛ' },
+    { text: 'n', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 'n' },
+  ],
+  leg: [
+    { text: 'l', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 'l' },
+    { text: 'e', type: 'short_vowel', soundRule: 'Short Vowel', phoneme: 'ɛ' },
+    { text: 'g', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 'g' },
+  ],
+  red: [
+    { text: 'r', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 'r' },
     { text: 'e', type: 'short_vowel', soundRule: 'Short Vowel', phoneme: 'ɛ' },
     { text: 'd', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 'd' },
   ],
@@ -57,12 +112,12 @@ export const CURATED_WORDS: Record<string, PhonicsBlock[]> = {
   ],
   shark: [
     { text: 'sh', type: 'digraph', soundRule: 'Digraphs', phoneme: 'ʃ' },
-    { text: 'ar', type: 'long_vowel', soundRule: 'R-Controlled Vowel', phoneme: 'ɑːr' },
+    { text: 'ar', type: 'r_controlled', soundRule: 'R-Controlled Vowel', phoneme: 'ɑːr' },
     { text: 'k', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 'k' },
   ],
   bark: [
     { text: 'b', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 'b' },
-    { text: 'ar', type: 'long_vowel', soundRule: 'R-Controlled Vowel', phoneme: 'ɑːr' },
+    { text: 'ar', type: 'r_controlled', soundRule: 'R-Controlled Vowel', phoneme: 'ɑːr' },
     { text: 'k', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 'k' },
   ],
   cake: [
@@ -103,9 +158,162 @@ export const CURATED_WORDS: Record<string, PhonicsBlock[]> = {
     { text: 'igh', type: 'long_vowel', soundRule: 'Vowel Teams', phoneme: 'aɪ' },
     { text: 't', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 't' },
   ],
+  sat: [
+    { text: 's', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 's' },
+    { text: 'a', type: 'short_vowel', soundRule: 'Short Vowel', phoneme: 'æ' },
+    { text: 't', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 't' },
+  ],
+  pin: [
+    { text: 'p', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 'p' },
+    { text: 'i', type: 'short_vowel', soundRule: 'Short Vowel', phoneme: 'ɪ' },
+    { text: 'n', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 'n' },
+  ],
+  tin: [
+    { text: 't', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 't' },
+    { text: 'i', type: 'short_vowel', soundRule: 'Short Vowel', phoneme: 'ɪ' },
+    { text: 'n', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 'n' },
+  ],
+  home: [
+    { text: 'h', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 'h' },
+    { text: 'o_e', type: 'long_vowel', soundRule: 'Magic E', phoneme: 'oʊ' },
+    { text: 'm', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 'm' },
+  ],
+  cute: [
+    { text: 'c', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 'k' },
+    { text: 'u_e', type: 'long_vowel', soundRule: 'Magic E', phoneme: 'juː' },
+    { text: 't', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 't' },
+  ],
+  wait: [
+    { text: 'w', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 'w' },
+    { text: 'ai', type: 'long_vowel', soundRule: 'Vowel Teams', phoneme: 'eɪ' },
+    { text: 't', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 't' },
+  ],
+  day: [
+    { text: 'd', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 'd' },
+    { text: 'ay', type: 'long_vowel', soundRule: 'Vowel Teams', phoneme: 'eɪ' },
+  ],
+  play: [
+    { text: 'pl', type: 'blend', soundRule: 'Initial Blends', phoneme: 'pl' },
+    { text: 'ay', type: 'long_vowel', soundRule: 'Vowel Teams', phoneme: 'eɪ' },
+  ],
+  say: [
+    { text: 's', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 's' },
+    { text: 'ay', type: 'long_vowel', soundRule: 'Vowel Teams', phoneme: 'eɪ' },
+  ],
+  haul: [
+    { text: 'h', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 'h' },
+    { text: 'au', type: 'diphthong', soundRule: 'Vowel Teams', phoneme: 'ɔː' },
+    { text: 'l', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 'l' },
+  ],
+  sauce: [
+    { text: 's', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 's' },
+    { text: 'au', type: 'diphthong', soundRule: 'Vowel Teams', phoneme: 'ɔː' },
+    { text: 'ce', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 's' },
+  ],
+  saw: [
+    { text: 's', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 's' },
+    { text: 'aw', type: 'diphthong', soundRule: 'Vowel Teams', phoneme: 'ɔː' },
+  ],
+  paw: [
+    { text: 'p', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 'p' },
+    { text: 'aw', type: 'diphthong', soundRule: 'Vowel Teams', phoneme: 'ɔː' },
+  ],
+  bee: [
+    { text: 'b', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 'b' },
+    { text: 'ee', type: 'long_vowel', soundRule: 'Vowel Teams', phoneme: 'iː' },
+  ],
+  tree: [
+    { text: 'tr', type: 'blend', soundRule: 'Initial Blends', phoneme: 'tr' },
+    { text: 'ee', type: 'long_vowel', soundRule: 'Vowel Teams', phoneme: 'iː' },
+  ],
+  feet: [
+    { text: 'f', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 'f' },
+    { text: 'ee', type: 'long_vowel', soundRule: 'Vowel Teams', phoneme: 'iː' },
+    { text: 't', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 't' },
+  ],
+  chair: [
+    { text: 'ch', type: 'digraph', soundRule: 'Digraphs', phoneme: 'tʃ' },
+    { text: 'air', type: 'long_vowel', soundRule: 'Vowel Teams', phoneme: 'eə' },
+  ],
+  chop: [
+    { text: 'ch', type: 'digraph', soundRule: 'Digraphs', phoneme: 'tʃ' },
+    { text: 'o', type: 'short_vowel', soundRule: 'Short Vowel', phoneme: 'ɒ' },
+    { text: 'p', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 'p' },
+  ],
+  duck: [
+    { text: 'd', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 'd' },
+    { text: 'u', type: 'short_vowel', soundRule: 'Short Vowel', phoneme: 'ʌ' },
+    { text: 'ck', type: 'digraph', soundRule: 'Digraphs', phoneme: 'k' },
+  ],
+  back: [
+    { text: 'b', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 'b' },
+    { text: 'a', type: 'short_vowel', soundRule: 'Short Vowel', phoneme: 'æ' },
+    { text: 'ck', type: 'digraph', soundRule: 'Digraphs', phoneme: 'k' },
+  ],
+  pick: [
+    { text: 'p', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 'p' },
+    { text: 'i', type: 'short_vowel', soundRule: 'Short Vowel', phoneme: 'ɪ' },
+    { text: 'ck', type: 'digraph', soundRule: 'Digraphs', phoneme: 'k' },
+  ],
+  laugh: [
+    { text: 'l', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 'l' },
+    { text: 'au', type: 'diphthong', soundRule: 'Vowel Teams', phoneme: 'ɔː' },
+    { text: 'gh', type: 'silent_letter', soundRule: 'Silent / F', phoneme: 'f' },
+  ],
+  tough: [
+    { text: 't', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 't' },
+    { text: 'ou', type: 'diphthong', soundRule: 'Vowel Teams', phoneme: 'ʌ' },
+    { text: 'gh', type: 'silent_letter', soundRule: 'Silent / F', phoneme: 'f' },
+  ],
+  vein: [
+    { text: 'v', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 'v' },
+    { text: 'ei', type: 'long_vowel', soundRule: 'Vowel Teams', phoneme: 'eɪ' },
+    { text: 'n', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 'n' },
+  ],
+  rein: [
+    { text: 'r', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 'r' },
+    { text: 'ei', type: 'long_vowel', soundRule: 'Vowel Teams', phoneme: 'eɪ' },
+    { text: 'n', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 'n' },
+  ],
+  feud: [
+    { text: 'f', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 'f' },
+    { text: 'eu', type: 'long_vowel', soundRule: 'Vowel Teams', phoneme: 'juː' },
+    { text: 'd', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 'd' },
+  ],
+  deuce: [
+    { text: 'd', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 'd' },
+    { text: 'eu', type: 'long_vowel', soundRule: 'Vowel Teams', phoneme: 'juː' },
+    { text: 'ce', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 's' },
+  ],
+  house: [
+    { text: 'h', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 'h' },
+    { text: 'ou', type: 'diphthong', soundRule: 'Vowel Teams', phoneme: 'aʊ' },
+    { text: 'se', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 's' },
+  ],
+  mouse: [
+    { text: 'm', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 'm' },
+    { text: 'ou', type: 'diphthong', soundRule: 'Vowel Teams', phoneme: 'aʊ' },
+    { text: 'se', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 's' },
+  ],
+  out: [
+    { text: 'ou', type: 'diphthong', soundRule: 'Vowel Teams', phoneme: 'aʊ' },
+    { text: 't', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 't' },
+  ],
+  new: [
+    { text: 'n', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 'n' },
+    { text: 'ew', type: 'long_vowel', soundRule: 'Vowel Teams', phoneme: 'juː' },
+  ],
+  few: [
+    { text: 'f', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 'f' },
+    { text: 'ew', type: 'long_vowel', soundRule: 'Vowel Teams', phoneme: 'juː' },
+  ],
+  dew: [
+    { text: 'd', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 'd' },
+    { text: 'ew', type: 'long_vowel', soundRule: 'Vowel Teams', phoneme: 'juː' },
+  ],
 };
 
-/** 取得適合關卡一（短單字）的精選單字 key 清單。 */
+/** @deprecated 課程單字改由 data/curriculum 驅動；保留供向後相容 */
 export const ALCHEMIST_WORDS: string[] = [
   'cat',
   'dog',

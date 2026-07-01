@@ -4,7 +4,10 @@ export type PhonicsType =
   | 'long_vowel'
   | 'digraph'
   | 'blend'
-  | 'silent_e';
+  | 'silent_e'
+  | 'r_controlled'
+  | 'diphthong'
+  | 'silent_letter';
 
 export interface PhonicsBlock {
   text: string; // 顯示的字母組合，例如 "sh", "ai", "t"

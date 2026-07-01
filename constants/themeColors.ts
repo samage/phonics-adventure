@@ -53,6 +53,24 @@ export const THEME_COLORS: Record<PhonicsType, ThemeColor> = {
     text: '#616161',
     label: '魔法 e（不發聲）',
   },
+  r_controlled: {
+    bg: '#F48FB1',
+    border: '#C2185B',
+    text: '#ffffff',
+    label: 'Bossy R',
+  },
+  diphthong: {
+    bg: '#CE93D8',
+    border: '#8E24AA',
+    text: '#ffffff',
+    label: '雙母音',
+  },
+  silent_letter: {
+    bg: '#B0BEC5',
+    border: '#546E7A',
+    text: '#263238',
+    label: '不發音字母',
+  },
 };
 
 export function getThemeColor(type: PhonicsType): ThemeColor {

@@ -11,6 +11,8 @@ interface PhonicsBlockCardProps {
   highlighted?: boolean;
   /** 是否變暗（X 光等情境用，本關卡未使用） */
   dimmed?: boolean;
+  /** 是否在積木下方顯示發音類型標籤（子音 / 短母音） */
+  showLabel?: boolean;
   size?: 'md' | 'lg' | 'xl';
 }
 
@@ -29,36 +31,46 @@ export default function PhonicsBlockCard({
   className = '',
   highlighted = false,
   dimmed = false,
+  showLabel = false,
   size = 'lg',
 }: PhonicsBlockCardProps) {
   const color = getThemeColor(block.type);
 
   return (
-    <div
-      className={[
-        'inline-flex select-none items-center justify-center rounded-3xl font-bold tracking-wide',
-        'transition-all duration-200 ease-out',
-        SIZE_CLASS[size],
-        highlighted ? 'scale-110 animate-glow z-10' : '',
-        dimmed ? 'opacity-30 saturate-50' : '',
-        className,
-      ].join(' ')}
-      style={{
-        backgroundColor: color.bg,
-        color: color.text,
-        border: `4px solid ${color.border}`,
-        boxShadow: highlighted ? undefined : `0 6px 0 0 ${color.border}`,
-      }}
-      aria-label={`${block.text}，${color.label}`}
-    >
-      {/* 顯示時把 Magic-E 的 a_e 呈現為 a̲e 風格的清楚樣式 */}
-      {block.text.includes('_e') ? (
-        <span>
-          {block.text[0]}
-          <span className="opacity-50">_</span>e
+    <div className="inline-flex flex-col items-center gap-2">
+      <div
+        className={[
+          'inline-flex select-none items-center justify-center rounded-3xl font-bold tracking-wide',
+          'transition-all duration-200 ease-out',
+          SIZE_CLASS[size],
+          highlighted ? 'scale-110 animate-glow z-10' : '',
+          dimmed ? 'opacity-30 saturate-50' : '',
+          className,
+        ].join(' ')}
+        style={{
+          backgroundColor: color.bg,
+          color: color.text,
+          border: `4px solid ${color.border}`,
+          boxShadow: highlighted ? undefined : `0 6px 0 0 ${color.border}`,
+        }}
+        aria-label={`${block.text}，${color.label}`}
+      >
+        {block.text.includes('_e') ? (
+          <span>
+            {block.text[0]}
+            <span className="opacity-50">_</span>e
+          </span>
+        ) : (
+          block.text
+        )}
+      </div>
+      {showLabel && (
+        <span
+          className="rounded-full px-3 py-0.5 text-sm font-medium"
+          style={{ backgroundColor: color.bg, color: color.text }}
+        >
+          {color.label}
         </span>
-      ) : (
-        block.text
       )}
     </div>
   );

@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "generate:letter-sounds": "python scripts/generate_letter_sounds.py",
+    "generate:phonics-audio": "python scripts/generate_phonics_audio.py"
   },
   "dependencies": {
     "canvas-confetti": "^1.9.4",

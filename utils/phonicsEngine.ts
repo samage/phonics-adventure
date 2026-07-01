@@ -69,7 +69,12 @@ const VOWEL_TEAMS: Record<string, string> = {
   oy: 'ɔɪ',
   au: 'ɔː',
   aw: 'ɔː',
-  ew: 'uː',
+  ew: 'juː',
+  ei: 'eɪ',
+  eu: 'juː',
+  ie: 'iː',
+  ue: 'uː',
+  ui: 'uː',
 };
 
 /** 混合子音（每個字母仍可聽出，但連在一起）。字首與字尾。 */
