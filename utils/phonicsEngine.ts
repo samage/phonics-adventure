@@ -101,7 +101,7 @@ function isConsonant(ch: string): boolean {
 
 /**
  * 偵測 Magic-E（silent_e）模式：字尾為 子音 + 母音 + 子音 + e。
- * 命中時回傳被 silent e 影響的母音索引（讓母音轉長音、結尾 e 標為 silent_e）。
+ * 命中時回傳被 silent e 影響的母音索引（母音改長音、字尾 e 標為 silent_e）。
  * 例如 cake -> 母音 a 在索引 1，結尾 e 為 silent。
  */
 function detectMagicE(word: string): number | null {
@@ -138,25 +138,23 @@ export function parseWordToBlocks(word: string): PhonicsBlock[] {
   }
 
   const magicVowelIndex = detectMagicE(clean);
-  // Magic-E 模式下，結尾的 e 已併入母音的 a_e 標記（如 cake -> c/a_e/k），不另外輸出。
   const silentEIndex = magicVowelIndex !== null ? clean.length - 1 : -1;
 
   const blocks: PhonicsBlock[] = [];
   let i = 0;
 
   while (i < clean.length) {
-    // 結尾的 silent e：已被母音的 a_e 標記涵蓋，略過不輸出
     if (i === silentEIndex) {
+      blocks.push(makeBlock('e', 'silent_e', 'Magic E', ''));
       i += 1;
       continue;
     }
 
-    // Magic-E 影響的母音：與結尾 e 組成 a_e 樣式，發長音
     if (i === magicVowelIndex) {
       const vowel = clean[i];
       blocks.push(
         makeBlock(
-          `${vowel}_e`,
+          vowel,
           'long_vowel',
           'Magic E',
           LONG_VOWEL_PHONEME[vowel] ?? vowel,

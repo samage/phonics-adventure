@@ -8,9 +8,6 @@ export default function Home() {
         <h1 className="text-5xl font-bold tracking-wide text-amber-600 drop-shadow-sm md:text-6xl">
           Phonics Adventure
         </h1>
-        <p className="max-w-xl text-xl text-amber-800/80 md:text-2xl">
-          自然發音的六十堂課 — 一步一步，看到字就會念
-        </p>
       </header>
 
       <LearningMap />

@@ -122,13 +122,15 @@ export const CURATED_WORDS: Record<string, PhonicsBlock[]> = {
   ],
   cake: [
     { text: 'c', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 'k' },
-    { text: 'a_e', type: 'long_vowel', soundRule: 'Magic E', phoneme: 'eɪ' },
+    { text: 'a', type: 'long_vowel', soundRule: 'Magic E', phoneme: 'eɪ' },
     { text: 'k', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 'k' },
+    { text: 'e', type: 'silent_e', soundRule: 'Magic E', phoneme: '' },
   ],
   bike: [
     { text: 'b', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 'b' },
-    { text: 'i_e', type: 'long_vowel', soundRule: 'Magic E', phoneme: 'aɪ' },
+    { text: 'i', type: 'long_vowel', soundRule: 'Magic E', phoneme: 'aɪ' },
     { text: 'k', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 'k' },
+    { text: 'e', type: 'silent_e', soundRule: 'Magic E', phoneme: '' },
   ],
   rain: [
     { text: 'r', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 'r' },
@@ -175,13 +177,15 @@ export const CURATED_WORDS: Record<string, PhonicsBlock[]> = {
   ],
   home: [
     { text: 'h', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 'h' },
-    { text: 'o_e', type: 'long_vowel', soundRule: 'Magic E', phoneme: 'oʊ' },
+    { text: 'o', type: 'long_vowel', soundRule: 'Magic E', phoneme: 'oʊ' },
     { text: 'm', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 'm' },
+    { text: 'e', type: 'silent_e', soundRule: 'Magic E', phoneme: '' },
   ],
   cute: [
     { text: 'c', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 'k' },
-    { text: 'u_e', type: 'long_vowel', soundRule: 'Magic E', phoneme: 'juː' },
+    { text: 'u', type: 'long_vowel', soundRule: 'Magic E', phoneme: 'juː' },
     { text: 't', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 't' },
+    { text: 'e', type: 'silent_e', soundRule: 'Magic E', phoneme: '' },
   ],
   wait: [
     { text: 'w', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 'w' },
@@ -273,13 +277,15 @@ export const CURATED_WORDS: Record<string, PhonicsBlock[]> = {
   ],
   page: [
     { text: 'p', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 'p' },
-    { text: 'a_e', type: 'long_vowel', soundRule: 'Magic E', phoneme: 'eɪ' },
+    { text: 'a', type: 'long_vowel', soundRule: 'Magic E', phoneme: 'eɪ' },
     { text: 'g', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 'g' },
+    { text: 'e', type: 'silent_e', soundRule: 'Magic E', phoneme: '' },
   ],
   life: [
     { text: 'l', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 'l' },
-    { text: 'i_e', type: 'long_vowel', soundRule: 'Magic E', phoneme: 'aɪ' },
+    { text: 'i', type: 'long_vowel', soundRule: 'Magic E', phoneme: 'aɪ' },
     { text: 'f', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 'f' },
+    { text: 'e', type: 'silent_e', soundRule: 'Magic E', phoneme: '' },
   ],
   bell: [
     { text: 'b', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 'b' },
@@ -304,13 +310,15 @@ export const CURATED_WORDS: Record<string, PhonicsBlock[]> = {
   ],
   five: [
     { text: 'f', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 'f' },
-    { text: 'i_e', type: 'long_vowel', soundRule: 'Magic E', phoneme: 'aɪ' },
+    { text: 'i', type: 'long_vowel', soundRule: 'Magic E', phoneme: 'aɪ' },
     { text: 'v', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 'v' },
+    { text: 'e', type: 'silent_e', soundRule: 'Magic E', phoneme: '' },
   ],
   vase: [
     { text: 'v', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 'v' },
-    { text: 'a_e', type: 'long_vowel', soundRule: 'Magic E', phoneme: 'eɪ' },
+    { text: 'a', type: 'long_vowel', soundRule: 'Magic E', phoneme: 'eɪ' },
     { text: 's', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 's' },
+    { text: 'e', type: 'silent_e', soundRule: 'Magic E', phoneme: '' },
   ],
   zip: [
     { text: 'z', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 'z' },
@@ -351,8 +359,9 @@ export const CURATED_WORDS: Record<string, PhonicsBlock[]> = {
   ],
   gate: [
     { text: 'g', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 'g' },
-    { text: 'a_e', type: 'long_vowel', soundRule: 'Magic E', phoneme: 'eɪ' },
+    { text: 'a', type: 'long_vowel', soundRule: 'Magic E', phoneme: 'eɪ' },
     { text: 't', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 't' },
+    { text: 'e', type: 'silent_e', soundRule: 'Magic E', phoneme: '' },
   ],
   tray: [
     { text: 'tr', type: 'blend', soundRule: 'Initial Blends', phoneme: 'tr' },
@@ -364,13 +373,15 @@ export const CURATED_WORDS: Record<string, PhonicsBlock[]> = {
   ],
   bone: [
     { text: 'b', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 'b' },
-    { text: 'o_e', type: 'long_vowel', soundRule: 'Magic E', phoneme: 'oʊ' },
+    { text: 'o', type: 'long_vowel', soundRule: 'Magic E', phoneme: 'oʊ' },
     { text: 'n', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 'n' },
+    { text: 'e', type: 'silent_e', soundRule: 'Magic E', phoneme: '' },
   ],
   like: [
     { text: 'l', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 'l' },
-    { text: 'i_e', type: 'long_vowel', soundRule: 'Magic E', phoneme: 'aɪ' },
+    { text: 'i', type: 'long_vowel', soundRule: 'Magic E', phoneme: 'aɪ' },
     { text: 'k', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 'k' },
+    { text: 'e', type: 'silent_e', soundRule: 'Magic E', phoneme: '' },
   ],
   pie: [
     { text: 'p', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 'p' },

@@ -1,0 +1,34 @@
+{
+  "sat": {
+    "spaced": "s a t",
+    "rate": "-32%"
+  },
+  "pin": {
+    "spaced": "p i n",
+    "rate": "-32%"
+  },
+  "bed": {
+    "spaced": "b e d",
+    "rate": "-32%"
+  },
+  "dog": {
+    "spaced": "d o g",
+    "rate": "-32%"
+  },
+  "sun": {
+    "spaced": "s u n",
+    "rate": "-32%"
+  },
+  "mat": {
+    "spaced": "m a t",
+    "rate": "-32%"
+  },
+  "pig": {
+    "spaced": "p i g",
+    "rate": "-32%"
+  },
+  "cup": {
+    "spaced": "c u p",
+    "rate": "-32%"
+  }
+}

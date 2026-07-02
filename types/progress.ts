@@ -17,4 +17,4 @@ export const DEFAULT_PROGRESS: UserProgress = {
   lastPlayedAt: '',
 };
 
-export const PROGRESS_STORAGE_KEY = 'phonics-adventure-progress-v2';
+export const PROGRESS_STORAGE_KEY = 'phonics-adventure-progress-v4';

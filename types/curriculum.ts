@@ -1,16 +1,10 @@
 export type UnitId =
-  | 'intro'
   | 'consonants_voiced'
   | 'consonants_voiceless'
   | 'vowels'
-  | 'blending'
-  | 'blends'
-  | 'finals'
-  | 'affixes'
-  | 'long_words';
+  | 'blending';
 
 export type ActivityType =
-  | 'course_intro'
   | 'letter_group'
   | 'blend_intro'
   | 'grapheme'
@@ -19,10 +13,6 @@ export type ActivityType =
   | 'sight_word';
 
 export type WordOrderMode = 'sequential' | 'random';
-
-export interface CourseIntroContent {
-  kind: 'course_intro';
-}
 
 export interface LetterGroupContent {
   kind: 'letter_group';
@@ -63,7 +53,6 @@ export interface SightWordContent {
 }
 
 export type ActivityContent =
-  | CourseIntroContent
   | LetterGroupContent
   | BlendIntroContent
   | GraphemeContent
@@ -101,7 +90,7 @@ export interface Unit {
 }
 
 export interface Curriculum {
-  version: '2.0.0';
+  version: '2.0.0' | '3.0.0';
   units: Unit[];
   lessons: Lesson[];
 }

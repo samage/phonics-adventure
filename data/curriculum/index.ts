@@ -1,14 +1,17 @@
 import type { Curriculum } from '@/types/curriculum';
 import { getPlayableLessons } from '@/types/curriculum';
-import { JUNYI_LESSONS, UNITS } from './junyi60';
+import { HOP_LESSONS, UNITS } from './hopCurriculum';
 
 export const CURRICULUM: Curriculum = {
-  version: '2.0.0',
+  version: '3.0.0',
   units: UNITS,
-  lessons: JUNYI_LESSONS,
+  lessons: HOP_LESSONS,
 };
 
-export { JUNYI_LESSONS, UNITS, ALL_SPELLINGS } from './junyi60';
+export { HOP_LESSONS, UNITS, ALL_SPELLINGS } from './hopCurriculum';
+
+/** @deprecated 改用 HOP_LESSONS */
+export const JUNYI_LESSONS = HOP_LESSONS;
 
 /** @deprecated 改用 ALL_SPELLINGS */
 export const ALL_LETTERS: string[] = [];

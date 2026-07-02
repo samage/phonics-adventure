@@ -1,0 +1,42 @@
+{
+  "sat": {
+    "onset": { "mode": "hopClip", "hopKey": "hop_s_ss_ce_se_c_sc", "startMs": 0, "clipMs": 1800 },
+    "rime": { "mode": "wordClip", "word": "sat", "startMs": 320 },
+    "blend": { "mode": "wordClip", "word": "sat" }
+  },
+  "pin": {
+    "onset": { "mode": "hopClip", "hopKey": "hop_p_pp", "startMs": 0, "clipMs": 1800 },
+    "rime": { "mode": "wordClip", "word": "pin", "startMs": 85 },
+    "blend": { "mode": "wordClip", "word": "pin" }
+  },
+  "bed": {
+    "onset": { "mode": "hopClip", "hopKey": "hop_b_bb", "startMs": 0, "clipMs": 1800 },
+    "rime": { "mode": "wordClip", "word": "bed", "startMs": 85 },
+    "blend": { "mode": "wordClip", "word": "bed" }
+  },
+  "dog": {
+    "onset": { "mode": "hopClip", "hopKey": "hop_d_dd", "startMs": 0, "clipMs": 1800 },
+    "rime": { "mode": "wordClip", "word": "dog", "startMs": 85 },
+    "blend": { "mode": "wordClip", "word": "dog" }
+  },
+  "sun": {
+    "onset": { "mode": "hopClip", "hopKey": "hop_s_ss_ce_se_c_sc", "startMs": 0, "clipMs": 1800 },
+    "rime": { "mode": "wordClip", "word": "sun", "startMs": 320 },
+    "blend": { "mode": "wordClip", "word": "sun" }
+  },
+  "mat": {
+    "onset": { "mode": "hopClip", "hopKey": "hop_m_mm_mb", "startMs": 0, "clipMs": 1800 },
+    "rime": { "mode": "wordClip", "word": "mat", "startMs": 280 },
+    "blend": { "mode": "wordClip", "word": "mat" }
+  },
+  "pig": {
+    "onset": { "mode": "hopClip", "hopKey": "hop_p_pp", "startMs": 0, "clipMs": 1800 },
+    "rime": { "mode": "wordClip", "word": "pig", "startMs": 85 },
+    "blend": { "mode": "wordClip", "word": "pig" }
+  },
+  "cup": {
+    "onset": { "mode": "hopClip", "hopKey": "hop_c_k_ck_q_ch", "startMs": 0, "clipMs": 1800 },
+    "rime": { "mode": "wordClip", "word": "cup", "startMs": 85 },
+    "blend": { "mode": "wordClip", "word": "cup" }
+  }
+}

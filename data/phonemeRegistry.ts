@@ -1,7 +1,7 @@
 /**
  * 音素音檔登錄表。
- * 播放優先使用 HOPE English 希平方音檔（/public/audio/hopenglish/）。
- * @see data/hopEnglishPhonics.ts
+ * - L42 混音拼讀：/public/audio/blend-phonemes/（絲—誒—特 教學音，見 blendPhonemeManifest.json）
+ * - 發音規則課：hop_* 希平方音檔，見 data/hopEnglishPhonics.ts
  */
 export interface PhonemeEntry {
   key: string;
@@ -96,7 +96,7 @@ export function getPhonemeEntry(key: string): PhonemeEntry | null {
 }
 
 export function phonemeAudioPath(key: string): string {
-  return `/audio/hopenglish/${key.toLowerCase()}.mp3`;
+  return `/audio/phonemes/${key.toLowerCase()}.mp3`;
 }
 
 /** 取得所有需產生音檔的 key → ipa */

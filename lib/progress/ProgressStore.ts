@@ -2,6 +2,7 @@ import type { UnitId } from '@/types/curriculum';
 import type { UserProgress } from '@/types/progress';
 import { CURRICULUM, getAllLessons } from '@/data/curriculum';
 import { getPlayableLessons } from '@/types/curriculum';
+import { DEV_UNLOCK_ALL_LESSONS } from '@/lib/devConfig';
 
 export interface ProgressStore {
   getProgress(): UserProgress;
@@ -39,6 +40,7 @@ export function createProgressHelpers(getProgress: () => UserProgress) {
   function isLessonUnlocked(lessonId: string): boolean {
     const lesson = findLesson(lessonId);
     if (!lesson) return false;
+    if (DEV_UNLOCK_ALL_LESSONS) return true;
     if (!lesson.implemented) return false;
     if (lesson.order === 1) return true;
     const prev = allLessons.find((l) => l.order === lesson.order - 1);

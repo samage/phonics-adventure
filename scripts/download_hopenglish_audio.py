@@ -30,15 +30,8 @@ PATTERN_AUDIO: dict[str, str] = {
     "hop_igh_ie_y_i_ie": "14", "hop_ou_ow": "15", "hop_oi_oy": "16",
 }
 
-# CVC 混音用單字母備援
-LETTER_AUDIO: dict[str, str] = {
-    "a": "13", "b": "17", "c": "34", "d": "18", "e": "21", "f": "32", "g": "19",
-    "h": "33", "i": "31", "j": "20", "k": "34", "l": "211", "m": "22", "n": "23",
-    "o": "41", "p": "35", "q": "34", "r": "24", "s": "36", "t": "37", "u": "51",
-    "v": "25", "w": "26", "y": "311", "z": "27",
-}
-
-ALL_KEYS = {**PATTERN_AUDIO, **LETTER_AUDIO}
+# 孤立音素（L42 混音）請用 npm run generate:phonics-audio → public/audio/phonemes/
+ALL_KEYS = PATTERN_AUDIO
 
 
 def download(url: str, dest: Path) -> None:

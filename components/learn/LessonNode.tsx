@@ -13,7 +13,8 @@ export default function LessonNode({
   lesson,
   isCurrent = false,
 }: LessonNodeProps) {
-  const { hydrated, isLessonCompleted, isLessonUnlocked } = useProgress();
+  const { hydrated, isLessonCompleted, isLessonUnlocked, setCurrentLesson } =
+    useProgress();
 
   if (!hydrated) {
     return (
@@ -75,7 +76,11 @@ export default function LessonNode({
   if (!lesson.implemented) return inner;
 
   return (
-    <Link href={`/learn/${lesson.id}`} className="block w-full">
+    <Link
+      href={`/learn/${lesson.id}/play`}
+      className="block w-full"
+      onClick={() => setCurrentLesson(lesson.id)}
+    >
       {inner}
     </Link>
   );

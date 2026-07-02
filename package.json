@@ -7,9 +7,13 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "generate:letter-sounds": "python scripts/generate_letter_sounds.py",
-    "generate:phonics-audio": "python scripts/generate_phonics_audio.py",
-    "download:hopenglish-audio": "python scripts/download_hopenglish_audio.py"
+    "generate:letter-sounds": "py -3 scripts/generate_letter_sounds.py",
+    "generate:phonics-audio": "py -3 scripts/generate_phonics_audio.py",
+    "generate:blend-demo": "py -3 scripts/generate_blend_demo_audio.py",
+    "generate:blend-phonemes": "py -3 scripts/generate_blend_phonemes.py",
+    "generate:smooth-blends": "py -3 scripts/generate_smooth_word_blends.py",
+    "generate:blend-words": "py -3 scripts/generate_blend_words.py",
+    "download:hopenglish-audio": "py -3 scripts/download_hopenglish_audio.py"
   },
   "dependencies": {
     "canvas-confetti": "^1.9.4",

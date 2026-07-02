@@ -1,7 +1,7 @@
 'use client';
 
 import { useProgress } from '@/lib/progress';
-import LessonPath60 from './LessonPath60';
+import LessonPath from './LessonPath';
 
 export default function LearningMap() {
   const { hydrated, getOverallProgress } = useProgress();
@@ -10,7 +10,6 @@ export default function LearningMap() {
   return (
     <div className="flex w-full max-w-2xl flex-col gap-6">
       <div className="rounded-3xl bg-white/80 p-6 text-center shadow-sm">
-        <p className="text-lg text-amber-700/80">自然發音的六十堂課</p>
         <p className="text-4xl font-bold text-amber-600">
           {hydrated ? `${overall.completed} / ${overall.total}` : '— / —'}
           <span className="ml-2 text-xl font-normal text-amber-800/70">堂</span>
@@ -28,7 +27,7 @@ export default function LearningMap() {
         </div>
       </div>
 
-      <LessonPath60 />
+      <LessonPath />
     </div>
   );
 }

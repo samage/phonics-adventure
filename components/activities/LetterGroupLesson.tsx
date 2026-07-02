@@ -97,7 +97,7 @@ export default function LetterGroupLesson({
     const meta = getLetterPhonics(currentLetter);
     return (
       <div className="flex w-full max-w-2xl flex-col items-center gap-6">
-        <PhonicsTypeLegend />
+        <PhonicsTypeLegend types={['consonant', 'short_vowel']} />
         <p className="text-2xl text-amber-800">
           {introIndex + 1} / {letters.length}
         </p>

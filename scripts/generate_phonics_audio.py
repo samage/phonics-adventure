@@ -1,8 +1,9 @@
 """
-以 SSML IPA 音素產生自然發音音檔。
-需要：pip install edge-tts
+以 SSML IPA 音素產生字母組合 / 長母音音檔（不含 26 字母—混音請用 generate_blend_words.py）。
+注意：edge-tts 已不支援自訂 SSML phoneme，請勿用此腳本產生 a-z 單字母音檔。
 
-執行：python scripts/generate_phonics_audio.py
+需要：pip install edge-tts
+執行：py -3 scripts/generate_phonics_audio.py
 """
 from __future__ import annotations
 
@@ -16,17 +17,9 @@ VOICE = "en-US-AnaNeural"
 ROOT = Path(__file__).resolve().parent.parent
 OUT_DIR = ROOT / "public" / "audio" / "phonemes"
 
-# 與 data/phonemeRegistry.ts 同步
+# 字母組合與長母音（26 字母混音請用 generate_blend_words.py）
 PHONEMES: dict[str, str] = {
-    # 26 字母
-    "a": "æ", "b": "b", "c": "k", "d": "d", "e": "ɛ", "f": "f",
-    "g": "g", "h": "h", "i": "ɪ", "j": "dʒ", "k": "k", "l": "l",
-    "m": "m", "n": "n", "o": "ɑ", "p": "p", "q": "k", "r": "ɹ",
-    "s": "s", "t": "t", "u": "ʌ", "v": "v", "w": "w", "x": "k s",
-    "y": "j", "z": "z",
-    # Magic E 長母音
     "long_a": "eɪ", "long_e": "iː", "long_i": "aɪ", "long_o": "oʊ", "long_u": "juː",
-    # 字母組合
     "ai": "eɪ", "ay": "eɪ", "au": "ɔ", "aw": "ɔ", "ee": "iː",
     "ch": "tʃ", "ck": "k", "gh": "f", "ei": "eɪ", "eu": "juː",
     "ou": "aʊ", "ew": "juː", "sh": "ʃ", "th": "θ", "ng": "ŋ",

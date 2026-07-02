@@ -1,7 +1,7 @@
 'use client';
 
 import type { WordOrderMode } from '@/types/curriculum';
-import SoundAlchemist from '@/components/games/SoundAlchemist/SoundAlchemist';
+import BlendWalkthrough from '@/components/activities/BlendWalkthrough';
 
 interface BlendIntroLessonProps {
   words: string[];
@@ -19,18 +19,13 @@ export default function BlendIntroLesson({
   onWordComplete,
 }: BlendIntroLessonProps) {
   return (
-    <div className="flex w-full flex-col items-center gap-4">
-      <p className="max-w-xl text-center text-xl text-amber-800">
-        把學過的發音組合在一起，拖積木進煉金爐拼出單字！
-      </p>
-      <SoundAlchemist
-        words={words}
-        wordOrder={wordOrder}
-        lessonId={lessonId}
-        onWordComplete={onWordComplete}
-        onLessonComplete={onComplete}
-        requireAllWords
-      />
-    </div>
+    <BlendWalkthrough
+      words={words}
+      demoWords={words.slice(0, 4)}
+      wordOrder={wordOrder}
+      lessonId={lessonId}
+      onComplete={onComplete}
+      onWordComplete={onWordComplete}
+    />
   );
 }

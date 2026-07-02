@@ -6,7 +6,8 @@ import { AnimatePresence, motion, type PanInfo } from 'framer-motion';
 import type { PhonicsBlock } from '@/types/phonics';
 import type { WordOrderMode } from '@/types/curriculum';
 import { parseWordToBlocks } from '@/utils/phonicsEngine';
-import { speakBlock, speakBlend, speakWord, cancelSpeech } from '@/lib/speech';
+import { speakBlock, speakWord, cancelSpeech } from '@/lib/speech';
+import { playBlendDemo, playBlendPartial } from '@/lib/blendDemoAudio';
 import { fireConfetti } from '@/components/ConfettiBurst';
 import PhonicsBlockCard from '@/components/PhonicsBlockCard';
 
@@ -21,7 +22,7 @@ export type PracticeMode = 'phonics' | 'spelling';
 export interface SoundAlchemistProps {
   words: string[];
   wordOrder?: WordOrderMode;
-  /** spelling：拼字母、只聽整字；phonics：混音積木、逐音素發音 */
+  /** spelling：依發音規則拼積木、只聽整字；phonics：混音積木、逐步混音示範 */
   practiceMode?: PracticeMode;
   lessonId?: string;
   stageId?: string;
@@ -29,8 +30,6 @@ export interface SoundAlchemistProps {
   onLessonComplete?: () => void;
   requireAllWords?: boolean;
 }
-
-const VOWELS = new Set(['a', 'e', 'i', 'o', 'u']);
 
 function shuffle<T>(arr: T[]): T[] {
   const copy = [...arr];
@@ -41,7 +40,7 @@ function shuffle<T>(arr: T[]): T[] {
   return copy;
 }
 
-function buildPhonicsItems(word: string): BlockItem[] {
+function buildWordItems(word: string): BlockItem[] {
   return parseWordToBlocks(word).map((block, index) => ({
     id: `${word}-slot${index}-${block.text}`,
     order: index,
@@ -49,22 +48,8 @@ function buildPhonicsItems(word: string): BlockItem[] {
   }));
 }
 
-/** 拼字模式：逐字母拆分，相同字母可互換 */
-function buildSpellingItems(word: string): BlockItem[] {
-  return [...word.toLowerCase()].map((char, index) => ({
-    id: `${word}-slot${index}-${char}`,
-    order: index,
-    block: {
-      text: char,
-      type: VOWELS.has(char) ? 'short_vowel' : 'consonant',
-      soundRule: 'Spelling',
-      phoneme: char,
-    },
-  }));
-}
-
-function buildItems(word: string, mode: PracticeMode): BlockItem[] {
-  return mode === 'spelling' ? buildSpellingItems(word) : buildPhonicsItems(word);
+function buildItems(word: string): BlockItem[] {
+  return buildWordItems(word);
 }
 
 function buildWordQueue(words: string[], order: WordOrderMode): string[] {
@@ -106,7 +91,7 @@ export default function SoundAlchemist({
   const [wordIndex, setWordIndex] = useState(0);
   const [word, setWord] = useState<string>(() => initialWord);
   const [items, setItems] = useState<BlockItem[]>(() =>
-    buildItems(initialWord, practiceMode),
+    buildItems(initialWord),
   );
   const [filledSlots, setFilledSlots] = useState<BlockItem[]>([]);
   const [usedIds, setUsedIds] = useState<Set<string>>(() => new Set());
@@ -154,7 +139,7 @@ export default function SoundAlchemist({
       if (isSpelling) {
         void speakWord(wordRef.current);
       } else {
-        void speakBlend(placedBlocks, 100).then(() => speakWord(wordRef.current));
+        void playBlendDemo(wordRef.current);
       }
     },
     [isSpelling, onWordComplete],
@@ -170,7 +155,7 @@ export default function SoundAlchemist({
 
       if (!blocksMatch(item.block, expected.block)) {
         setRejectingId(item.id);
-        if (!isSpelling) void speakBlock(item.block);
+        void speakBlock(item.block);
         window.setTimeout(() => setRejectingId(null), 450);
         return;
       }
@@ -187,10 +172,7 @@ export default function SoundAlchemist({
       if (newFilled.length === itemsRef.current.length) {
         completeWord(newFilled);
       } else if (!isSpelling) {
-        void speakBlend(
-          newFilled.map((i) => i.block),
-          120,
-        );
+        void playBlendPartial(wordRef.current, newFilled.length);
       }
     },
     [isSpelling, completeWord],
@@ -199,7 +181,7 @@ export default function SoundAlchemist({
   const loadWord = useCallback(
     (nextWord: string) => {
       cancelSpeech();
-      const nextItems = buildItems(nextWord, practiceMode);
+      const nextItems = buildItems(nextWord);
       const emptyUsed = new Set<string>();
 
       setWord(nextWord);
@@ -294,7 +276,7 @@ export default function SoundAlchemist({
   return (
     <div className="flex w-full max-w-5xl flex-col items-center gap-8">
       <div className="flex flex-wrap items-center justify-center gap-3 text-2xl text-amber-800">
-        <span>{isSpelling ? '聽音後，把字母拖進煉金爐拼字' : '把積木依順序拖進煉金爐'}</span>
+        <span>{isSpelling ? '聽音後，把拼法積木拖進煉金爐' : '把積木拖進煉金爐，聽音素連在一起'}</span>
         <span className="rounded-full bg-amber-200 px-4 py-1 text-amber-900">
           單字 {wordIndex + 1} / {wordQueue.length}
         </span>
@@ -302,6 +284,21 @@ export default function SoundAlchemist({
           {placedCount} / {items.length}
         </span>
       </div>
+
+      {!isSpelling && !won && (
+        <div className="flex flex-col items-center gap-2">
+          <button
+            type="button"
+            onClick={() => void playBlendDemo(word)}
+            className="rounded-full bg-purple-100 px-6 py-3 text-xl text-purple-900 hover:bg-purple-200"
+          >
+            🔊 聽示範（s + at → sat）
+          </button>
+          <p className="text-sm text-purple-700/80">
+            拉長第一個音，再接韻尾，一口氣念出來
+          </p>
+        </div>
+      )}
 
       {isSpelling && !won && (
         <div className="flex flex-col items-center gap-2">
@@ -313,7 +310,7 @@ export default function SoundAlchemist({
             🔊 聽聽看
           </button>
           <p className="text-sm text-amber-600/80">
-            共 {word.length} 個字母，請聽音後自己拼
+            共 {items.length} 塊拼法，請聽整字後依規則組合
           </p>
         </div>
       )}
@@ -341,10 +338,17 @@ export default function SoundAlchemist({
             {items.map((slot, i) => (
               <div
                 key={slot.id}
-                className="flex h-20 min-w-[4rem] items-center justify-center rounded-2xl border-2 border-dashed border-purple-200 bg-white/50"
+                className="flex h-20 min-w-[5.5rem] items-center justify-center rounded-2xl border-2 border-dashed border-purple-200 bg-white/50 px-1"
+                style={{
+                  minWidth: slot.block.text.length > 2 ? '7.5rem' : undefined,
+                }}
               >
                 {filledSlots[i] ? (
-                  <PhonicsBlockCard block={filledSlots[i].block} size="lg" />
+                  <PhonicsBlockCard
+                    block={filledSlots[i].block}
+                    size="lg"
+                    showBlendHint={false}
+                  />
                 ) : (
                   <span className="text-3xl text-purple-200">＿</span>
                 )}
@@ -357,16 +361,29 @@ export default function SoundAlchemist({
               <span className="pointer-events-none text-3xl text-purple-300">煉金爐</span>
             )}
             <AnimatePresence>
-              {filledSlots.map((item) => (
+              {filledSlots.map((item, index) => (
                 <motion.div
                   key={item.id}
                   layout
                   initial={{ scale: 0.4, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
                   transition={{ type: 'spring', stiffness: 500, damping: 24 }}
-                  className="pointer-events-none"
+                  className="pointer-events-none flex items-center"
                 >
-                  <PhonicsBlockCard block={item.block} size="xl" highlighted={won} />
+                  {index > 0 && (
+                    <span
+                      className="mx-1 text-2xl font-bold text-purple-400"
+                      aria-hidden
+                    >
+                      —
+                    </span>
+                  )}
+                  <PhonicsBlockCard
+                    block={item.block}
+                    size="xl"
+                    highlighted={won}
+                    showBlendHint={false}
+                  />
                 </motion.div>
               ))}
             </AnimatePresence>
@@ -430,14 +447,18 @@ export default function SoundAlchemist({
                     rejectingId === item.id ? 'animate-wiggle' : '',
                   ].join(' ')}
                 >
-                  <PhonicsBlockCard block={item.block} size="lg" />
+                  <PhonicsBlockCard
+                    block={item.block}
+                    size="lg"
+                    showBlendHint={false}
+                  />
                 </motion.div>
               ))}
             </AnimatePresence>
           </div>
           <p className="text-lg text-amber-700/70">
             {isSpelling
-              ? '點一下字母放進格子，或拖進煉金爐；相同字母可任意選擇'
+              ? '點一下積木放進格子，或拖進煉金爐；相同拼法可任意選擇'
               : '點一下積木聽聲音，拖進煉金爐拼單字'}
           </p>
         </>
