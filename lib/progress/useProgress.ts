@@ -1,16 +1,28 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { UnitId } from '@/types/curriculum';
-import type { UserProgress } from '@/types/progress';
+import { DEFAULT_PROGRESS, type UserProgress } from '@/types/progress';
+import { createProgressHelpers } from './ProgressStore';
 import { getProgressStore } from './LocalProgressStore';
+
+function cloneDefaultProgress(): UserProgress {
+  return {
+    ...DEFAULT_PROGRESS,
+    completedLessons: [],
+    wordStats: {},
+  };
+}
 
 export function useProgress() {
   const store = getProgressStore();
-  const [progress, setProgress] = useState<UserProgress>(() =>
-    store.getProgress(),
-  );
+  const [progress, setProgress] = useState<UserProgress>(cloneDefaultProgress);
   const [hydrated, setHydrated] = useState(false);
+
+  const helpers = useMemo(
+    () => createProgressHelpers(() => progress),
+    [progress],
+  );
 
   useEffect(() => {
     setProgress(store.getProgress());
@@ -45,23 +57,23 @@ export function useProgress() {
   );
 
   const isLessonCompleted = useCallback(
-    (lessonId: string) => store.isLessonCompleted(lessonId),
-    [store, progress],
+    (lessonId: string) => helpers.isLessonCompleted(lessonId),
+    [helpers],
   );
 
   const isLessonUnlocked = useCallback(
-    (lessonId: string) => store.isLessonUnlocked(lessonId),
-    [store, progress],
+    (lessonId: string) => helpers.isLessonUnlocked(lessonId),
+    [helpers],
   );
 
   const getUnitProgress = useCallback(
-    (unitId: UnitId) => store.getUnitProgress(unitId),
-    [store, progress],
+    (unitId: UnitId) => helpers.getUnitProgress(unitId),
+    [helpers],
   );
 
   const getOverallProgress = useCallback(
-    () => store.getOverallProgress(),
-    [store, progress],
+    () => helpers.getOverallProgress(),
+    [helpers],
   );
 
   return {

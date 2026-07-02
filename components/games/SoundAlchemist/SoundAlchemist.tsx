@@ -16,15 +16,21 @@ interface BlockItem {
   block: PhonicsBlock;
 }
 
+export type PracticeMode = 'phonics' | 'spelling';
+
 export interface SoundAlchemistProps {
   words: string[];
   wordOrder?: WordOrderMode;
+  /** spelling：拼字母、只聽整字；phonics：混音積木、逐音素發音 */
+  practiceMode?: PracticeMode;
   lessonId?: string;
   stageId?: string;
   onWordComplete?: (word: string) => void;
   onLessonComplete?: () => void;
   requireAllWords?: boolean;
 }
+
+const VOWELS = new Set(['a', 'e', 'i', 'o', 'u']);
 
 function shuffle<T>(arr: T[]): T[] {
   const copy = [...arr];
@@ -35,12 +41,30 @@ function shuffle<T>(arr: T[]): T[] {
   return copy;
 }
 
-function buildItems(word: string): BlockItem[] {
+function buildPhonicsItems(word: string): BlockItem[] {
   return parseWordToBlocks(word).map((block, index) => ({
-    id: `${index}-${block.text}`,
+    id: `${word}-slot${index}-${block.text}`,
     order: index,
     block,
   }));
+}
+
+/** 拼字模式：逐字母拆分，相同字母可互換 */
+function buildSpellingItems(word: string): BlockItem[] {
+  return [...word.toLowerCase()].map((char, index) => ({
+    id: `${word}-slot${index}-${char}`,
+    order: index,
+    block: {
+      text: char,
+      type: VOWELS.has(char) ? 'short_vowel' : 'consonant',
+      soundRule: 'Spelling',
+      phoneme: char,
+    },
+  }));
+}
+
+function buildItems(word: string, mode: PracticeMode): BlockItem[] {
+  return mode === 'spelling' ? buildSpellingItems(word) : buildPhonicsItems(word);
 }
 
 function buildWordQueue(words: string[], order: WordOrderMode): string[] {
@@ -48,9 +72,27 @@ function buildWordQueue(words: string[], order: WordOrderMode): string[] {
   return [...words];
 }
 
+function blocksMatch(a: PhonicsBlock, b: PhonicsBlock): boolean {
+  return a.text.toLowerCase() === b.text.toLowerCase();
+}
+
+function isInsideCauldron(
+  point: { x: number; y: number },
+  rect: DOMRect,
+  padding = 32,
+): boolean {
+  return (
+    point.x >= rect.left - padding &&
+    point.x <= rect.right + padding &&
+    point.y >= rect.top - padding &&
+    point.y <= rect.bottom + padding
+  );
+}
+
 export default function SoundAlchemist({
   words,
   wordOrder = 'sequential',
+  practiceMode = 'phonics',
   lessonId,
   stageId,
   onWordComplete,
@@ -58,47 +100,127 @@ export default function SoundAlchemist({
   requireAllWords = true,
 }: SoundAlchemistProps) {
   const initialWord = words[0] ?? '';
+  const isSpelling = practiceMode === 'spelling';
 
   const [wordQueue] = useState<string[]>(() => buildWordQueue(words, wordOrder));
   const [wordIndex, setWordIndex] = useState(0);
   const [word, setWord] = useState<string>(() => initialWord);
-  const [items, setItems] = useState<BlockItem[]>(() => buildItems(initialWord));
-  const [placedCount, setPlacedCount] = useState(0);
-  const [poolOrder, setPoolOrder] = useState<string[]>(() =>
-    buildItems(initialWord).map((i) => i.id),
+  const [items, setItems] = useState<BlockItem[]>(() =>
+    buildItems(initialWord, practiceMode),
   );
+  const [filledSlots, setFilledSlots] = useState<BlockItem[]>([]);
+  const [usedIds, setUsedIds] = useState<Set<string>>(() => new Set());
+  const [poolOrder, setPoolOrder] = useState<string[]>([]);
+  const [ready, setReady] = useState(false);
   const [rejectingId, setRejectingId] = useState<string | null>(null);
   const [won, setWon] = useState(false);
   const [lessonDone, setLessonDone] = useState(false);
 
   const cauldronRef = useRef<HTMLDivElement>(null);
   const didInit = useRef(false);
+  const itemsRef = useRef(items);
+  const filledRef = useRef(filledSlots);
+  const usedIdsRef = useRef(usedIds);
+  const wordRef = useRef(word);
 
-  const placedItems = useMemo(
-    () =>
-      items
-        .filter((i) => i.order < placedCount)
-        .sort((a, b) => a.order - b.order),
-    [items, placedCount],
-  );
+  useEffect(() => {
+    itemsRef.current = items;
+  }, [items]);
+  useEffect(() => {
+    filledRef.current = filledSlots;
+  }, [filledSlots]);
+  useEffect(() => {
+    usedIdsRef.current = usedIds;
+  }, [usedIds]);
+  useEffect(() => {
+    wordRef.current = word;
+  }, [word]);
+
+  const placedCount = filledSlots.length;
 
   const poolItems = useMemo(() => {
-    const remaining = items.filter((i) => i.order >= placedCount);
+    const remaining = items.filter((i) => !usedIds.has(i.id));
     return poolOrder
       .map((id) => remaining.find((i) => i.id === id))
       .filter((i): i is BlockItem => Boolean(i));
-  }, [items, placedCount, poolOrder]);
+  }, [items, usedIds, poolOrder]);
 
-  const loadWord = useCallback((nextWord: string) => {
-    cancelSpeech();
-    const nextItems = buildItems(nextWord);
-    setWord(nextWord);
-    setItems(nextItems);
-    setPlacedCount(0);
-    setPoolOrder(shuffle(nextItems.map((i) => i.id)));
-    setWon(false);
-    setRejectingId(null);
-  }, []);
+  const completeWord = useCallback(
+    (finalFilled: BlockItem[]) => {
+      setWon(true);
+      fireConfetti();
+      onWordComplete?.(wordRef.current);
+      const placedBlocks = finalFilled.map((i) => i.block);
+      if (isSpelling) {
+        void speakWord(wordRef.current);
+      } else {
+        void speakBlend(placedBlocks, 100).then(() => speakWord(wordRef.current));
+      }
+    },
+    [isSpelling, onWordComplete],
+  );
+
+  const tryPlaceItem = useCallback(
+    (item: BlockItem) => {
+      if (usedIdsRef.current.has(item.id)) return;
+
+      const slotIndex = filledRef.current.length;
+      const expected = itemsRef.current[slotIndex];
+      if (!expected) return;
+
+      if (!blocksMatch(item.block, expected.block)) {
+        setRejectingId(item.id);
+        if (!isSpelling) void speakBlock(item.block);
+        window.setTimeout(() => setRejectingId(null), 450);
+        return;
+      }
+
+      const newFilled = [...filledRef.current, item];
+      const newUsed = new Set(usedIdsRef.current);
+      newUsed.add(item.id);
+
+      filledRef.current = newFilled;
+      usedIdsRef.current = newUsed;
+      setFilledSlots(newFilled);
+      setUsedIds(newUsed);
+
+      if (newFilled.length === itemsRef.current.length) {
+        completeWord(newFilled);
+      } else if (!isSpelling) {
+        void speakBlend(
+          newFilled.map((i) => i.block),
+          120,
+        );
+      }
+    },
+    [isSpelling, completeWord],
+  );
+
+  const loadWord = useCallback(
+    (nextWord: string) => {
+      cancelSpeech();
+      const nextItems = buildItems(nextWord, practiceMode);
+      const emptyUsed = new Set<string>();
+
+      setWord(nextWord);
+      setItems(nextItems);
+      setFilledSlots([]);
+      setUsedIds(emptyUsed);
+      setPoolOrder(shuffle(nextItems.map((i) => i.id)));
+      setWon(false);
+      setRejectingId(null);
+
+      itemsRef.current = nextItems;
+      filledRef.current = [];
+      usedIdsRef.current = emptyUsed;
+      wordRef.current = nextWord;
+
+      if (practiceMode === 'spelling') {
+        window.setTimeout(() => speakWord(nextWord), 400);
+      }
+    },
+    [practiceMode],
+  );
 
   const startNextWord = useCallback(() => {
     const nextIndex = wordIndex + 1;
@@ -116,47 +238,23 @@ export default function SoundAlchemist({
     if (didInit.current || !initialWord) return;
     didInit.current = true;
     loadWord(wordQueue[0] ?? initialWord);
+    setReady(true);
   }, [initialWord, wordQueue, loadWord]);
 
-  const handleDrop = useCallback(
+  const handleDragEnd = useCallback(
     (item: BlockItem, info: PanInfo) => {
       const cauldron = cauldronRef.current;
       if (!cauldron) return;
 
-      const rect = cauldron.getBoundingClientRect();
-      const { x, y } = info.point;
-      const insideCauldron =
-        x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom;
-
-      if (!insideCauldron) {
-        void speakBlock(item.block);
+      const inside = isInsideCauldron(info.point, cauldron.getBoundingClientRect());
+      if (!inside) {
+        if (!isSpelling) void speakBlock(item.block);
         return;
       }
 
-      if (item.order === placedCount) {
-        const newCount = placedCount + 1;
-        setPlacedCount(newCount);
-
-        const placedNow = items
-          .filter((i) => i.order < newCount)
-          .sort((a, b) => a.order - b.order)
-          .map((i) => i.block);
-
-        if (newCount === items.length) {
-          setWon(true);
-          fireConfetti();
-          onWordComplete?.(word);
-          void speakBlend(placedNow, 100).then(() => speakWord(word));
-        } else {
-          void speakBlend(placedNow, 120);
-        }
-      } else {
-        setRejectingId(item.id);
-        void speakBlock(item.block);
-        window.setTimeout(() => setRejectingId(null), 450);
-      }
+      tryPlaceItem(item);
     },
-    [items, placedCount, word, onWordComplete],
+    [isSpelling, tryPlaceItem],
   );
 
   const progress = items.length === 0 ? 0 : placedCount / items.length;
@@ -167,7 +265,7 @@ export default function SoundAlchemist({
       <div className="flex flex-col items-center gap-6 animate-pop-in">
         <p className="text-4xl font-bold text-green-700">太棒了！關卡完成！</p>
         <p className="text-xl text-amber-700">
-          你完成了 {wordQueue.length} 個單字的混音練習
+          你完成了 {wordQueue.length} 個單字的{isSpelling ? '拼字' : '混音'}練習
         </p>
         {lessonId || stageId ? (
           <Link
@@ -185,10 +283,18 @@ export default function SoundAlchemist({
     return <p className="text-xl text-gray-500">沒有可練習的單字</p>;
   }
 
+  if (!ready) {
+    return (
+      <div className="flex w-full max-w-5xl flex-col items-center gap-8 py-12">
+        <p className="text-xl text-amber-700">準備拼字練習…</p>
+      </div>
+    );
+  }
+
   return (
     <div className="flex w-full max-w-5xl flex-col items-center gap-8">
-      <div className="flex items-center gap-3 text-2xl text-amber-800">
-        <span>把積木依順序拖進煉金爐</span>
+      <div className="flex flex-wrap items-center justify-center gap-3 text-2xl text-amber-800">
+        <span>{isSpelling ? '聽音後，把字母拖進煉金爐拼字' : '把積木依順序拖進煉金爐'}</span>
         <span className="rounded-full bg-amber-200 px-4 py-1 text-amber-900">
           單字 {wordIndex + 1} / {wordQueue.length}
         </span>
@@ -196,6 +302,21 @@ export default function SoundAlchemist({
           {placedCount} / {items.length}
         </span>
       </div>
+
+      {isSpelling && !won && (
+        <div className="flex flex-col items-center gap-2">
+          <button
+            type="button"
+            onClick={() => speakWord(word)}
+            className="rounded-full bg-amber-100 px-6 py-3 text-xl text-amber-900 hover:bg-amber-200"
+          >
+            🔊 聽聽看
+          </button>
+          <p className="text-sm text-amber-600/80">
+            共 {word.length} 個字母，請聽音後自己拼
+          </p>
+        </div>
+      )}
 
       <div
         ref={cauldronRef}
@@ -207,40 +328,50 @@ export default function SoundAlchemist({
         ].join(' ')}
       >
         <div
-          className={[
-            'pointer-events-none absolute inset-0 rounded-[2.5rem] transition-opacity duration-500',
-            won ? 'opacity-100' : 'opacity-0',
-          ].join(' ')}
+          className="pointer-events-none absolute inset-0 rounded-[2.5rem] transition-opacity duration-500"
           style={{
+            opacity: won ? 1 : 0,
             background:
               'radial-gradient(circle at 50% 60%, rgba(255,213,79,0.55), transparent 70%)',
           }}
         />
 
-        {placedItems.length === 0 && (
-          <span className="text-3xl text-purple-300">煉金爐</span>
+        {isSpelling && !won ? (
+          <div className="flex flex-wrap items-center justify-center gap-2">
+            {items.map((slot, i) => (
+              <div
+                key={slot.id}
+                className="flex h-20 min-w-[4rem] items-center justify-center rounded-2xl border-2 border-dashed border-purple-200 bg-white/50"
+              >
+                {filledSlots[i] ? (
+                  <PhonicsBlockCard block={filledSlots[i].block} size="lg" />
+                ) : (
+                  <span className="text-3xl text-purple-200">＿</span>
+                )}
+              </div>
+            ))}
+          </div>
+        ) : (
+          <>
+            {filledSlots.length === 0 && (
+              <span className="pointer-events-none text-3xl text-purple-300">煉金爐</span>
+            )}
+            <AnimatePresence>
+              {filledSlots.map((item) => (
+                <motion.div
+                  key={item.id}
+                  layout
+                  initial={{ scale: 0.4, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ type: 'spring', stiffness: 500, damping: 24 }}
+                  className="pointer-events-none"
+                >
+                  <PhonicsBlockCard block={item.block} size="xl" highlighted={won} />
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </>
         )}
-
-        <AnimatePresence>
-          {placedItems.map((item) => (
-            <motion.button
-              key={item.id}
-              type="button"
-              layout
-              initial={{ scale: 0.4, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ type: 'spring', stiffness: 500, damping: 24 }}
-              onClick={() => speakBlock(item.block)}
-              className="cursor-pointer"
-            >
-              <PhonicsBlockCard
-                block={item.block}
-                size="xl"
-                highlighted={won}
-              />
-            </motion.button>
-          ))}
-        </AnimatePresence>
       </div>
 
       {won ? (
@@ -273,8 +404,18 @@ export default function SoundAlchemist({
                   dragSnapToOrigin
                   dragMomentum={false}
                   whileDrag={{ scale: 1.15, zIndex: 50 }}
-                  onDragEnd={(_, info) => handleDrop(item, info)}
-                  onTap={() => speakBlock(item.block)}
+                  onDragEnd={(_, info) => handleDragEnd(item, info)}
+                  onClick={() => {
+                    if (isSpelling) tryPlaceItem(item);
+                  }}
+                  onKeyDown={(e) => {
+                    if (isSpelling && (e.key === 'Enter' || e.key === ' ')) {
+                      e.preventDefault();
+                      tryPlaceItem(item);
+                    }
+                  }}
+                  role={isSpelling ? 'button' : undefined}
+                  tabIndex={isSpelling ? 0 : undefined}
                   initial={{ scale: 0, opacity: 0 }}
                   animate={{
                     scale: 1,
@@ -283,7 +424,9 @@ export default function SoundAlchemist({
                   }}
                   exit={{ scale: 0, opacity: 0 }}
                   className={[
-                    'cursor-grab touch-none active:cursor-grabbing',
+                    isSpelling
+                      ? 'cursor-pointer touch-manipulation'
+                      : 'cursor-grab touch-none active:cursor-grabbing',
                     rejectingId === item.id ? 'animate-wiggle' : '',
                   ].join(' ')}
                 >
@@ -293,7 +436,9 @@ export default function SoundAlchemist({
             </AnimatePresence>
           </div>
           <p className="text-lg text-amber-700/70">
-            點一下積木聽聲音，拖進煉金爐拼單字
+            {isSpelling
+              ? '點一下字母放進格子，或拖進煉金爐；相同字母可任意選擇'
+              : '點一下積木聽聲音，拖進煉金爐拼單字'}
           </p>
         </>
       )}

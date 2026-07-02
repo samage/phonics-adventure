@@ -1,5 +1,5 @@
 """
-產生字母與字母組合的預錄音檔。
+以 SSML IPA 音素產生自然發音音檔。
 需要：pip install edge-tts
 
 執行：python scripts/generate_phonics_audio.py
@@ -7,49 +7,80 @@
 from __future__ import annotations
 
 import asyncio
+import json
 from pathlib import Path
 
 import edge_tts
 
 VOICE = "en-US-AnaNeural"
-RATE = "-25%"
 ROOT = Path(__file__).resolve().parent.parent
-LETTER_DIR = ROOT / "public" / "audio" / "letter-sounds"
-GRAPHEME_DIR = ROOT / "public" / "audio" / "graphemes"
+OUT_DIR = ROOT / "public" / "audio" / "phonemes"
 
-LETTER_SOUND_SPOKEN: dict[str, str] = {
-    "a": "ah", "e": "eh", "i": "ih", "o": "aw", "u": "uh",
-    "f": "fff", "h": "hhh", "l": "lll", "m": "mmm", "n": "nnn",
-    "r": "rrr", "s": "sss", "v": "vvv", "z": "zzz",
-    "b": "buh", "c": "kuh", "d": "duh", "g": "guh", "j": "juh",
-    "k": "kuh", "p": "puh", "t": "tuh", "q": "kw", "w": "wuh",
-    "x": "ks", "y": "yuh",
+# 與 data/phonemeRegistry.ts 同步
+PHONEMES: dict[str, str] = {
+    # 26 字母
+    "a": "æ", "b": "b", "c": "k", "d": "d", "e": "ɛ", "f": "f",
+    "g": "g", "h": "h", "i": "ɪ", "j": "dʒ", "k": "k", "l": "l",
+    "m": "m", "n": "n", "o": "ɑ", "p": "p", "q": "k", "r": "ɹ",
+    "s": "s", "t": "t", "u": "ʌ", "v": "v", "w": "w", "x": "k s",
+    "y": "j", "z": "z",
+    # Magic E 長母音
+    "long_a": "eɪ", "long_e": "iː", "long_i": "aɪ", "long_o": "oʊ", "long_u": "juː",
+    # 字母組合
+    "ai": "eɪ", "ay": "eɪ", "au": "ɔ", "aw": "ɔ", "ee": "iː",
+    "ch": "tʃ", "ck": "k", "gh": "f", "ei": "eɪ", "eu": "juː",
+    "ou": "aʊ", "ew": "juː", "sh": "ʃ", "th": "θ", "ng": "ŋ",
+    "oa": "oʊ", "oo": "uː", "ow": "oʊ", "oi": "ɔɪ", "ar": "ɑɹ",
+    "or": "ɔɹ", "er": "ɚ", "ph": "f", "wh": "w", "igh": "aɪ",
 }
 
-GRAPHEME_SOUND_SPOKEN: dict[str, str] = {
-    "magic_e": "ay ee eye oh you",
-    "ai": "ay", "ay": "ay", "au": "aw", "aw": "aw", "ee": "ee",
-    "ch": "ch", "ck": "k", "gh": "f", "ei": "ay", "eu": "you",
-    "ou": "ow", "ew": "oo",
+# Magic E 規則說明（自然語句，非 IPA）
+RULE_TEXT: dict[str, str] = {
+    "magic_e_rule": "The e at the end is silent, and makes the vowel say its name.",
 }
 
 
-async def save(text: str, path: Path) -> None:
+def ssml_ipa(ipa: str) -> str:
+    return f"""<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="en-US">
+  <voice name="{VOICE}">
+    <prosody rate="-20%" pitch="-5%">
+      <phoneme alphabet="ipa" ph="{ipa}">sound</phoneme>
+    </prosody>
+  </voice>
+</speak>"""
+
+
+def ssml_text(text: str) -> str:
+    return f"""<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="en-US">
+  <voice name="{VOICE}">
+    <prosody rate="-15%">{text}</prosody>
+  </voice>
+</speak>"""
+
+
+async def save_ssml(ssml: str, path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    communicate = edge_tts.Communicate(text, VOICE, rate=RATE)
+    communicate = edge_tts.Communicate(ssml, VOICE)
     await communicate.save(str(path))
-    print(f"  {path.name}  <-  {text!r}")
 
 
 async def main() -> None:
-    print("字母音...")
-    for letter, text in LETTER_SOUND_SPOKEN.items():
-        await save(text, LETTER_DIR / f"{letter}.mp3")
+    OUT_DIR.mkdir(parents=True, exist_ok=True)
+    print(f"輸出：{OUT_DIR}")
 
-    print("字母組合...")
-    for key, text in GRAPHEME_SOUND_SPOKEN.items():
-        await save(text, GRAPHEME_DIR / f"{key}.mp3")
+    for key, ipa in PHONEMES.items():
+        path = OUT_DIR / f"{key}.mp3"
+        await save_ssml(ssml_ipa(ipa), path)
+        print(f"  {key}.mp3")
 
+    for key, text in RULE_TEXT.items():
+        path = OUT_DIR / f"{key}.mp3"
+        await save_ssml(ssml_text(text), path)
+        print(f"  {key}.mp3  rule")
+
+    # 寫 manifest 供除錯
+    manifest = {**PHONEMES, **{k: v for k, v in RULE_TEXT.items()}}
+    (OUT_DIR / "manifest.json").write_text(json.dumps(manifest, indent=2), encoding="utf-8")
     print("完成！")
 
 

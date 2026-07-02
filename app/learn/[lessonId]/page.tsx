@@ -10,10 +10,18 @@ export default function LessonPage() {
   const params = useParams<{ lessonId: string }>();
   const lessonId = params.lessonId;
   const lesson = findLesson(CURRICULUM, lessonId);
-  const { isLessonUnlocked, isLessonCompleted, setCurrentLesson } =
+  const { hydrated, isLessonUnlocked, isLessonCompleted, setCurrentLesson } =
     useProgress();
 
   if (!lesson) notFound();
+
+  if (!hydrated) {
+    return (
+      <main className="flex flex-1 flex-col items-center justify-center gap-6 p-6">
+        <p className="text-xl text-amber-700">載入中…</p>
+      </main>
+    );
+  }
 
   const unlocked = isLessonUnlocked(lesson.id);
   const completed = isLessonCompleted(lesson.id);

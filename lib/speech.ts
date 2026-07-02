@@ -1,10 +1,9 @@
 import type { PhonicsBlock } from '@/types/phonics';
+import { speakBlockPhoneme } from '@/lib/phonicsAudio';
 
 /**
- * 語音控制模組（MVP 免付費 API 作法）。
- *
- * 使用瀏覽器原生 Web Speech API（window.speechSynthesis）。
- * 字母音（Letter Sound）優先使用預錄音檔，因原生 TTS 會把單字母唸成字母名。
+ * 語音控制模組。
+ * 字母音 / 積木音素一律走 phonicsAudio（IPA 預錄音），避免 TTS 念成字母名。
  */
 
 const DEFAULT_LANG = 'en-US';
@@ -64,7 +63,7 @@ export function playAudioFile(src: string): Promise<boolean> {
 }
 
 /**
- * 以原生 TTS 唸出一段文字。回傳 Promise，於語音結束時 resolve。
+ * 以原生 TTS 唸出一段文字（主要用於完整單字，不用於單字母）。
  */
 export function speak(text: string, options: SpeakOptions = {}): Promise<void> {
   return new Promise((resolve) => {
@@ -101,21 +100,9 @@ export function speakWord(word: string): Promise<void> {
   return speak(word, { rate: DEFAULT_RATE });
 }
 
-function speakSnippet(key: string): Promise<boolean> {
-  const safe = key.replace(/[^a-z0-9_-]/gi, '');
-  if (!safe) return Promise.resolve(false);
-  return playAudioFile(`/audio/snippets/${safe}.mp3`);
-}
-
-/** 唸出單一發音積木的音素。 */
+/** 唸出單一發音積木的音素（走 IPA 音檔，非字母名）。 */
 export async function speakBlock(block: PhonicsBlock): Promise<void> {
-  cancelSpeech();
-
-  const played = await speakSnippet(block.phoneme || block.text);
-  if (played) return;
-
-  const spoken = block.text.replace('_e', '').replace('_', '');
-  return speak(spoken, { rate: 0.6, pitch: 1.15 });
+  return speakBlockPhoneme(block);
 }
 
 /** 依序播放多個積木的混音（Blending）。 */
@@ -126,7 +113,7 @@ export async function speakBlend(
   cancelSpeech();
   for (const block of blocks) {
     if (block.type === 'silent_e') continue;
-    await speakBlock(block);
+    await speakBlockPhoneme(block);
     if (gapMs > 0) {
       await new Promise((r) => setTimeout(r, gapMs));
     }

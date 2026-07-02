@@ -13,6 +13,8 @@ interface PhonicsBlockCardProps {
   dimmed?: boolean;
   /** 是否在積木下方顯示發音類型標籤（子音 / 短母音） */
   showLabel?: boolean;
+  /** 多拼法顯示（d / dd）時縮小字級 */
+  multiSpelling?: boolean;
   size?: 'md' | 'lg' | 'xl';
 }
 
@@ -20,6 +22,12 @@ const SIZE_CLASS: Record<NonNullable<PhonicsBlockCardProps['size']>, string> = {
   md: 'text-5xl px-5 py-3 min-w-[4.5rem]',
   lg: 'text-6xl px-6 py-4 min-w-[5.5rem]',
   xl: 'text-7xl px-8 py-5 min-w-[7rem]',
+};
+
+const MULTI_SIZE_CLASS: Record<NonNullable<PhonicsBlockCardProps['size']>, string> = {
+  md: 'text-2xl px-4 py-3 min-w-[8rem]',
+  lg: 'text-3xl px-5 py-4 min-w-[10rem]',
+  xl: 'text-4xl px-6 py-5 min-w-[12rem]',
 };
 
 /**
@@ -32,9 +40,13 @@ export default function PhonicsBlockCard({
   highlighted = false,
   dimmed = false,
   showLabel = false,
+  multiSpelling = false,
   size = 'lg',
 }: PhonicsBlockCardProps) {
   const color = getThemeColor(block.type);
+  const sizeClass = multiSpelling && block.text.includes('/')
+    ? MULTI_SIZE_CLASS[size]
+    : SIZE_CLASS[size];
 
   return (
     <div className="inline-flex flex-col items-center gap-2">
@@ -42,7 +54,7 @@ export default function PhonicsBlockCard({
         className={[
           'inline-flex select-none items-center justify-center rounded-3xl font-bold tracking-wide',
           'transition-all duration-200 ease-out',
-          SIZE_CLASS[size],
+          sizeClass,
           highlighted ? 'scale-110 animate-glow z-10' : '',
           dimmed ? 'opacity-30 saturate-50' : '',
           className,

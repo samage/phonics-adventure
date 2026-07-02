@@ -1,9 +1,19 @@
 import type { PhonicsBlock } from '@/types/phonics';
 import { getLetterPhonics } from '@/data/letterPhonics';
 import { graphemeToBlock, getGraphemePhonics } from '@/data/graphemePhonics';
-import { speakPhoneme } from './phonicsAudio';
+import {
+  speakPhoneme,
+  speakLetterSound,
+  speakBlockPhoneme,
+  resolveBlockAudioKey,
+} from '@/lib/phonicsAudio';
 
-export { speakPhoneme as speakLetterSound } from './phonicsAudio';
+export {
+  speakPhoneme,
+  speakLetterSound,
+  speakBlockPhoneme,
+  resolveBlockAudioKey,
+} from '@/lib/phonicsAudio';
 
 export function isSingleLetter(char: string): boolean {
   return /^[a-z]$/i.test(char);

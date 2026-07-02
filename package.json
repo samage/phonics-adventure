@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "generate:letter-sounds": "python scripts/generate_letter_sounds.py",
-    "generate:phonics-audio": "python scripts/generate_phonics_audio.py"
+    "generate:phonics-audio": "python scripts/generate_phonics_audio.py",
+    "download:hopenglish-audio": "python scripts/download_hopenglish_audio.py"
   },
   "dependencies": {
     "canvas-confetti": "^1.9.4",

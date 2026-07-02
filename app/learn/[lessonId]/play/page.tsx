@@ -6,12 +6,10 @@ import { findLesson } from '@/types/curriculum';
 import type {
   BlendIntroContent,
   GraphemeContent,
-  LetterGroupContent,
 } from '@/types/curriculum';
 import { CURRICULUM } from '@/data/curriculum';
 import { useProgress } from '@/lib/progress';
 import CourseIntro from '@/components/activities/CourseIntro';
-import LetterGroupLesson from '@/components/activities/LetterGroupLesson';
 import BlendIntroLesson from '@/components/activities/BlendIntroLesson';
 import GraphemeLesson from '@/components/activities/GraphemeLesson';
 
@@ -19,9 +17,18 @@ export default function LessonPlayPage() {
   const params = useParams<{ lessonId: string }>();
   const lessonId = params.lessonId;
   const lesson = findLesson(CURRICULUM, lessonId);
-  const { isLessonUnlocked, completeLesson, recordWordAttempt } = useProgress();
+  const { hydrated, isLessonUnlocked, completeLesson, recordWordAttempt } =
+    useProgress();
 
   if (!lesson) notFound();
+
+  if (!hydrated) {
+    return (
+      <main className="flex flex-1 flex-col items-center justify-center gap-6 p-6">
+        <p className="text-xl text-amber-700">載入中…</p>
+      </main>
+    );
+  }
 
   if (!isLessonUnlocked(lesson.id)) {
     return (
@@ -65,15 +72,6 @@ export default function LessonPlayPage() {
         <CourseIntro lessonId={lessonId} onComplete={handleComplete} />
       )}
 
-      {activity.type === 'letter_group' && (
-        <LetterGroupLesson
-          letters={(activity.content as LetterGroupContent).letters}
-          quizCount={(activity.content as LetterGroupContent).quizCount}
-          lessonId={lessonId}
-          onComplete={handleComplete}
-        />
-      )}
-
       {activity.type === 'blend_intro' && (
         <BlendIntroLesson
           words={(activity.content as BlendIntroContent).words}
@@ -86,6 +84,7 @@ export default function LessonPlayPage() {
 
       {activity.type === 'grapheme' && (
         <GraphemeLesson
+          patternKey={(activity.content as GraphemeContent).patternKey}
           graphemes={(activity.content as GraphemeContent).graphemes}
           words={(activity.content as GraphemeContent).words}
           wordOrder={(activity.content as GraphemeContent).wordOrder}

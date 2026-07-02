@@ -13,7 +13,19 @@ export default function LessonNode({
   lesson,
   isCurrent = false,
 }: LessonNodeProps) {
-  const { isLessonCompleted, isLessonUnlocked } = useProgress();
+  const { hydrated, isLessonCompleted, isLessonUnlocked } = useProgress();
+
+  if (!hydrated) {
+    return (
+      <div className="flex w-full items-center gap-3 rounded-2xl border-4 border-gray-200 bg-white/60 px-4 py-3 opacity-70">
+        <span className="shrink-0 rounded-full bg-gray-200 px-2 py-0.5 text-sm font-bold text-gray-500">
+          {lesson.id}
+        </span>
+        <p className="flex-1 text-left font-bold text-gray-400">{lesson.title}</p>
+      </div>
+    );
+  }
+
   const completed = isLessonCompleted(lesson.id);
   const unlocked = isLessonUnlocked(lesson.id);
 

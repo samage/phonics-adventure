@@ -1,12 +1,11 @@
 export type UnitId =
   | 'intro'
-  | 'consonants'
+  | 'consonants_voiced'
+  | 'consonants_voiceless'
   | 'vowels'
   | 'blending'
-  | 'magic_e'
-  | 'graphemes'
-  | 'finals'
   | 'blends'
+  | 'finals'
   | 'affixes'
   | 'long_words';
 
@@ -39,10 +38,11 @@ export interface BlendIntroContent {
 
 export interface GraphemeContent {
   kind: 'grapheme';
+  /** Hop English 發音規則 key，如 hop_d_dd */
+  patternKey: string;
   graphemes: string[];
   words: string[];
   wordOrder?: WordOrderMode;
-  /** 規則說明，如 Magic E */
   ruleHint?: string;
 }
 
