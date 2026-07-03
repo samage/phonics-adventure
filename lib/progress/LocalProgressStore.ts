@@ -1,8 +1,11 @@
 import {
   DEFAULT_PROGRESS,
+  LEGACY_PROGRESS_STORAGE_KEY,
+  LEGACY_PROGRESS_V4_KEY,
   PROGRESS_STORAGE_KEY,
   type UserProgress,
 } from '@/types/progress';
+import { migrateLessonIdFromLegacy } from '@/data/curriculum';
 import type { UnitId } from '@/types/curriculum';
 import {
   applyCompleteLesson,
@@ -11,20 +14,73 @@ import {
   type ProgressStore,
 } from './ProgressStore';
 
+function migrateLessonIds(
+  lessonIds: string[],
+  source: 'v4' | 'v5',
+): string[] {
+  return lessonIds.map((id) => migrateLessonIdFromLegacy(id, source));
+}
+
+function migrateProgress(
+  raw: UserProgress,
+  source: 'v4' | 'v5',
+): UserProgress {
+  return {
+    ...raw,
+    completedLessons: migrateLessonIds(raw.completedLessons, source),
+    currentLessonId: raw.currentLessonId
+      ? migrateLessonIdFromLegacy(raw.currentLessonId, source)
+      : null,
+  };
+}
+
 function loadFromStorage(): UserProgress {
   if (typeof window === 'undefined') return { ...DEFAULT_PROGRESS };
   try {
-    const raw = localStorage.getItem(PROGRESS_STORAGE_KEY);
-    if (!raw) return { ...DEFAULT_PROGRESS };
-    const parsed = JSON.parse(raw) as UserProgress;
-    return {
-      completedLessons: Array.isArray(parsed.completedLessons)
-        ? parsed.completedLessons
-        : [],
-      currentLessonId: parsed.currentLessonId ?? null,
-      wordStats: parsed.wordStats ?? {},
-      lastPlayedAt: parsed.lastPlayedAt ?? '',
-    };
+    const rawV6 = localStorage.getItem(PROGRESS_STORAGE_KEY);
+    if (rawV6) {
+      const parsed = JSON.parse(rawV6) as UserProgress;
+      return {
+        completedLessons: Array.isArray(parsed.completedLessons)
+          ? parsed.completedLessons
+          : [],
+        currentLessonId: parsed.currentLessonId ?? null,
+        wordStats: parsed.wordStats ?? {},
+        lastPlayedAt: parsed.lastPlayedAt ?? '',
+      };
+    }
+
+    const rawV5 = localStorage.getItem(LEGACY_PROGRESS_STORAGE_KEY);
+    if (rawV5) {
+      const parsed = JSON.parse(rawV5) as UserProgress;
+      const migrated = migrateProgress({
+        completedLessons: Array.isArray(parsed.completedLessons)
+          ? parsed.completedLessons
+          : [],
+        currentLessonId: parsed.currentLessonId ?? null,
+        wordStats: parsed.wordStats ?? {},
+        lastPlayedAt: parsed.lastPlayedAt ?? '',
+      }, 'v5');
+      localStorage.setItem(PROGRESS_STORAGE_KEY, JSON.stringify(migrated));
+      return migrated;
+    }
+
+    const rawV4 = localStorage.getItem(LEGACY_PROGRESS_V4_KEY);
+    if (rawV4) {
+      const parsed = JSON.parse(rawV4) as UserProgress;
+      const migrated = migrateProgress({
+        completedLessons: Array.isArray(parsed.completedLessons)
+          ? parsed.completedLessons
+          : [],
+        currentLessonId: parsed.currentLessonId ?? null,
+        wordStats: parsed.wordStats ?? {},
+        lastPlayedAt: parsed.lastPlayedAt ?? '',
+      }, 'v4');
+      localStorage.setItem(PROGRESS_STORAGE_KEY, JSON.stringify(migrated));
+      return migrated;
+    }
+
+    return { ...DEFAULT_PROGRESS };
   } catch {
     return { ...DEFAULT_PROGRESS };
   }

@@ -6,16 +6,21 @@ import { useParams, notFound } from 'next/navigation';
 import { findLesson } from '@/types/curriculum';
 import type {
   BlendIntroContent,
+  DecodableSentenceContent,
   GraphemeContent,
+  SightWordContent,
 } from '@/types/curriculum';
-import { CURRICULUM } from '@/data/curriculum';
+import { CURRICULUM, resolveLessonId } from '@/data/curriculum';
 import { useProgress } from '@/lib/progress';
 import BlendIntroLesson from '@/components/activities/BlendIntroLesson';
 import GraphemeLesson from '@/components/activities/GraphemeLesson';
+import SightWordLesson from '@/components/activities/SightWordLesson';
+import DecodableSentenceLesson from '@/components/activities/DecodableSentenceLesson';
 
 export default function LessonPlayPage() {
   const params = useParams<{ lessonId: string }>();
-  const lessonId = params.lessonId;
+  const rawId = params.lessonId;
+  const lessonId = resolveLessonId(rawId);
   const lesson = findLesson(CURRICULUM, lessonId);
   const { hydrated, isLessonUnlocked, completeLesson, recordWordAttempt, setCurrentLesson } =
     useProgress();
@@ -92,6 +97,20 @@ export default function LessonPlayPage() {
           lessonId={lessonId}
           onComplete={handleComplete}
           onWordComplete={(w) => recordWordAttempt(w, true)}
+        />
+      )}
+
+      {activity.type === 'sight_word' && (
+        <SightWordLesson
+          words={(activity.content as SightWordContent).words}
+          onComplete={handleComplete}
+        />
+      )}
+
+      {activity.type === 'decodable_sentences' && (
+        <DecodableSentenceLesson
+          sentences={(activity.content as DecodableSentenceContent).sentences}
+          onComplete={handleComplete}
         />
       )}
     </main>

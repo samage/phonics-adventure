@@ -121,6 +121,20 @@ export const HOP_ENGLISH_PATTERNS: HopEnglishPattern[] = [
   pat('hop_igh_ie_y_i_ie', 'igh / i-e / y / i / ie', '14', 'long_vowel', 'Vowel Team', 'vowel', ['light', 'like', 'sky', 'island', 'pie'], 'igh / i-e / y / i / ie 發 /aɪ/'),
   pat('hop_ou_ow', 'ou / ow', '15', 'diphthong', 'Vowel Team', 'vowel', ['house', 'cow'], 'ou / ow 發 /aʊ/'),
   pat('hop_oi_oy', 'oi / oy', '16', 'diphthong', 'Vowel Team', 'vowel', ['coin', 'boy'], 'oi / oy 發 /ɔɪ/'),
+
+  // 進階課：th 清／濁合併（SCR 有 th_voiceless + th_voiced）
+  pat(
+    'hop_th_combined',
+    'th',
+    '40',
+    'consonant',
+    'Voiceless Consonant',
+    'voiceless_consonant',
+    ['thin', 'math', 'then', 'father'],
+    'th 有清音與濁音兩種',
+    'th 有兩種音：清音 thin、math；濁音 then、father。同一組字母，要聽整字判斷。',
+    { thin: '清音', then: '濁音' },
+  ),
 ];
 
 export const HOP_PATTERN_MAP: Record<string, HopEnglishPattern> = Object.fromEntries(

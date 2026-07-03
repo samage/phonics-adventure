@@ -1,56 +1,52 @@
-import {
-  blendDemoBlendPath,
-  blendDemoOnsetPath,
-  blendDemoRimePath,
-  getDemoClipTiming,
-  splitCvcOnsetRime,
-} from '@/data/blendOnsetRime';
-import { cancelSpeech, playAudioFile, playAudioFileRange } from '@/lib/speech';
+import { splitCvcOnsetRime } from '@/data/blendOnsetRime';
+import { speakBlockPhoneme } from '@/lib/phonicsAudio';
+import { cancelSpeech, speakWord } from '@/lib/speech';
+import { parseWordToBlocks } from '@/utils/phonicsEngine';
 
 function delay(ms: number): Promise<void> {
   return new Promise((r) => setTimeout(r, ms));
 }
 
-async function playDemoPart(word: string, part: 'onset' | 'rime' | 'blend'): Promise<boolean> {
-  const src = part === 'onset'
-    ? blendDemoOnsetPath(word)
-    : part === 'rime'
-      ? blendDemoRimePath(word)
-      : blendDemoBlendPath(word);
-  const { startMs, clipMs } = getDemoClipTiming(word, part);
-
-  if (startMs > 0 || clipMs) {
-    return playAudioFileRange(src, startMs, clipMs);
-  }
-  return playAudioFile(src);
-}
-
 export type BlendHighlight = 'onset' | 'rime' | 'word' | null;
 
 /**
- * 三步混音示範（希平方音檔 + 例字截取）：
- * 1. 拉長首音（s…）或塞音短促音（ㄅ、ㄉ） 2. 讀韻尾（at） 3. 整字連讀
+ * 三步混音示範（SCR 音素 + Web Speech 整字）：
+ * 1. 首音 2. 韻尾／其餘音素 3. 整字 TTS
  */
 export async function playBlendDemo(
   word: string,
   onStep?: (step: BlendHighlight) => void,
 ): Promise<boolean> {
   cancelSpeech();
+  const blocks = parseWordToBlocks(word);
+  if (blocks.length === 0) return false;
+
   const split = splitCvcOnsetRime(word);
-  if (!split) return false;
+  const playable = blocks.filter((b) => b.type !== 'silent_e');
 
-  const w = word.toLowerCase();
+  if (split && playable.length >= 2) {
+    onStep?.('onset');
+    await speakBlockPhoneme(playable[0]);
+    await delay(350);
 
-  onStep?.('onset');
-  if (!(await playDemoPart(w, 'onset'))) return false;
-  await delay(350);
+    onStep?.('rime');
+    for (let i = 1; i < playable.length; i++) {
+      await speakBlockPhoneme(playable[i]);
+      await delay(220);
+    }
+    await delay(280);
 
-  onStep?.('rime');
-  if (!(await playDemoPart(w, 'rime'))) return false;
-  await delay(350);
+    onStep?.('word');
+    await speakWord(word);
+    onStep?.(null);
+    return true;
+  }
 
-  onStep?.('word');
-  if (!(await playDemoPart(w, 'blend'))) return false;
+  for (const block of playable) {
+    await speakBlockPhoneme(block);
+    await delay(280);
+  }
+  await speakWord(word);
   onStep?.(null);
   return true;
 }
@@ -60,15 +56,17 @@ export async function playBlendPartial(
   filledCount: number,
 ): Promise<void> {
   cancelSpeech();
-  const split = splitCvcOnsetRime(word);
-  if (!split || filledCount < 1) return;
+  const blocks = parseWordToBlocks(word).filter((b) => b.type !== 'silent_e');
+  if (filledCount < 1 || blocks.length === 0) return;
 
-  const w = word.toLowerCase();
-  await playDemoPart(w, 'onset');
+  await speakBlockPhoneme(blocks[0]);
   if (filledCount < 2) return;
 
-  await delay(280);
-  await playDemoPart(w, 'rime');
+  await delay(260);
+  for (let i = 1; i < Math.min(filledCount, blocks.length); i++) {
+    await speakBlockPhoneme(blocks[i]);
+    await delay(200);
+  }
 }
 
 /** @deprecated 改用 playBlendDemo */

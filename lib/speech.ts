@@ -7,7 +7,7 @@ import {
 
 /**
  * 語音控制模組。
- * L42 混音採希平方音檔截取 + 例字韻尾／整字。
+ * 音素：Sound City Reading 預錄音檔；整字與備援：Web Speech API。
  */
 
 const DEFAULT_LANG = 'en-US';

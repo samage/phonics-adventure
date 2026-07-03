@@ -1,8 +1,4 @@
 import type { PhonicsBlock } from '@/types/phonics';
-import {
-  blendPhonemeAudioPath,
-  getBlendPhoneme,
-} from '@/data/blendPedagogy';
 import { getHopPattern } from '@/data/hopEnglishPatterns';
 import {
   GRAPHEME_PHONEMES,
@@ -10,8 +6,16 @@ import {
   LONG_VOWEL_PHONEMES,
   getPhonemeEntry,
 } from '@/data/phonemeRegistry';
-import { hopEnglishLocalPath, hopEnglishRemoteUrl } from '@/data/hopEnglishPhonics';
-import { cancelSpeech, playAudioFile, playAudioFileSegment, speak } from '@/lib/speech';
+import {
+  playSoundcityForBlock,
+  playSoundcityKey,
+} from '@/lib/phonemeAudio';
+import {
+  hopTtsPhonemeFallback,
+  resolveHopSoundcityKeys,
+} from '@/lib/hopPhonemeAudio';
+import { playIpaHopPhoneme } from '@/lib/ipaPhonemeAudio';
+import { cancelSpeech, speak } from '@/lib/speech';
 
 function isSingleLetter(char: string): boolean {
   return /^[a-z]$/i.test(char);
@@ -37,50 +41,43 @@ export function resolveBlockAudioKey(block: PhonicsBlock): string {
   return text;
 }
 
-async function playHopPattern(key: string): Promise<boolean> {
-  const pattern = getHopPattern(key);
-  if (!pattern) return false;
-
-  const audioKey = pattern.key;
-  const local = hopEnglishLocalPath(audioKey);
-  if (await playAudioFile(local)) return true;
-
-  const remote = hopEnglishRemoteUrl(audioKey);
-  if (remote && (await playAudioFile(remote))) return true;
-
-  const base = hopEnglishRemoteUrl('hop_a')?.replace(/\/\d+\.mp3$/, '');
-  if (base && (await playAudioFile(`${base}/${pattern.audioId}.mp3`))) return true;
-
-  return false;
+function ttsFallbackForKey(key: string): string {
+  const entry = getPhonemeEntry(key);
+  if (entry) return entry.fallback;
+  return key;
 }
 
-/** 混音教學音：絲—誒—特（拉長音 + 可選短截） */
-async function playBlendPhoneme(key: string): Promise<boolean> {
-  const k = key.toLowerCase();
-  const entry = getBlendPhoneme(k);
-  if (!entry) return false;
-
-  const src = blendPhonemeAudioPath(k);
-  if (entry.playMs && entry.playMs > 0) {
-    return playAudioFileSegment(src, entry.playMs);
-  }
-  return playAudioFile(src);
-}
-
-/** 播放單一音素或希平方發音規則 */
+/** 播放單一音素：Sound City Reading → Web Speech */
 export async function speakPhoneme(key: string): Promise<void> {
   cancelSpeech();
   const k = key.toLowerCase();
 
-  if (k.startsWith('hop_') && (await playHopPattern(k))) return;
+  if (k.startsWith('hop_')) {
+    const pattern = getHopPattern(k);
+    if (pattern) {
+      if (await playIpaHopPhoneme(k)) return;
+
+      const scrKeys = resolveHopSoundcityKeys(k);
+      if (scrKeys.length > 0) {
+        for (let i = 0; i < scrKeys.length; i++) {
+          if (i > 0) {
+            await new Promise((r) => setTimeout(r, 400));
+          }
+          await playSoundcityKey(scrKeys[i]);
+        }
+        return;
+      }
+      await speak(hopTtsPhonemeFallback(k, pattern), { rate: 0.45, pitch: 1.0 });
+      return;
+    }
+  }
 
   if (k.startsWith('blend:')) {
     const letters = k.slice(6);
     for (let i = 0; i < letters.length; i++) {
       await speakPhoneme(letters[i]);
       if (i < letters.length - 1) {
-        const gap = getBlendPhoneme(letters[i])?.gapAfterMs ?? 280;
-        await new Promise((r) => setTimeout(r, gap));
+        await new Promise((r) => setTimeout(r, 200));
       }
     }
     return;
@@ -88,25 +85,20 @@ export async function speakPhoneme(key: string): Promise<void> {
 
   if (k === 'x') {
     await speakPhoneme('k');
-    await new Promise((r) => setTimeout(r, 200));
+    await new Promise((r) => setTimeout(r, 180));
     await speakPhoneme('s');
     return;
   }
 
-  if (isSingleLetter(k) && LETTER_PHONEMES[k]) {
-    if (await playBlendPhoneme(k)) return;
-  }
+  if (await playSoundcityKey(k)) return;
 
-  const entry = getPhonemeEntry(k);
-  if (entry) {
-    return speak(entry.fallback, { rate: 0.45, pitch: 1.0 });
-  }
-
-  return speak(k, { rate: 0.45, pitch: 1.0 });
+  await speak(ttsFallbackForKey(k), { rate: 0.45, pitch: 1.0 });
 }
 
 export async function speakBlockPhoneme(block: PhonicsBlock): Promise<void> {
   if (block.type === 'silent_e') return;
+  cancelSpeech();
+  if (await playSoundcityForBlock(block)) return;
   const key = resolveBlockAudioKey(block);
   return speakPhoneme(key);
 }

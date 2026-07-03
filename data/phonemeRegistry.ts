@@ -1,7 +1,6 @@
 /**
- * 音素音檔登錄表。
- * - L42 混音拼讀：/public/audio/blend-phonemes/（絲—誒—特 教學音，見 blendPhonemeManifest.json）
- * - 發音規則課：hop_* 希平方音檔，見 data/hopEnglishPhonics.ts
+ * 音素音檔登錄表（TTS 備援用文字）。
+ * 預錄音檔使用 /public/audio/soundcity/（SCR .mp3 + Wikimedia 補充 .ogg）。
  */
 export interface PhonemeEntry {
   key: string;
@@ -95,8 +94,8 @@ export function getPhonemeEntry(key: string): PhonemeEntry | null {
   );
 }
 
-export function phonemeAudioPath(key: string): string {
-  return `/audio/phonemes/${key.toLowerCase()}.mp3`;
+export function phonemeAudioPath(_key: string): string {
+  return '';
 }
 
 /** 取得所有需產生音檔的 key → ipa */

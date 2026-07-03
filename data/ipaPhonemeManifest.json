@@ -1,0 +1,52 @@
+[
+  {
+    "hopKey": "hop_s_si_z",
+    "commonsTitle": "Voiced palato-alveolar sibilant.ogg",
+    "localFile": "voiced_palato-alveolar_sibilant.ogg",
+    "ipa": "ʒ",
+    "author": "Peter Isotalo",
+    "license": "CC BY-SA 4.0",
+    "note": "乾淨 /ʒ/ 摩擦音（treasure）",
+    "sourceUrl": "https://upload.wikimedia.org/wikipedia/commons/3/30/Voiced_palato-alveolar_sibilant.ogg"
+  },
+  {
+    "hopKey": "hop_ir_er_ur_or",
+    "commonsTitle": "En-us-er.ogg",
+    "localFile": "en-us-er.ogg",
+    "ipa": "ɚ",
+    "author": "Dvortygirl",
+    "license": "CC BY-SA 3.0",
+    "note": "美式兒化音（bird、runner）",
+    "sourceUrl": "https://upload.wikimedia.org/wikipedia/commons/e/e1/En-us-er.ogg"
+  },
+  {
+    "hopKey": "hop_schwa",
+    "commonsTitle": "Mid-central vowel.ogg",
+    "localFile": "mid-central_vowel.ogg",
+    "ipa": "ə",
+    "author": "Denelson83",
+    "license": "GFDL / CC BY-SA",
+    "note": "弱讀中央母音（about）",
+    "sourceUrl": "https://upload.wikimedia.org/wikipedia/commons/d/d9/Mid-central_vowel.ogg"
+  },
+  {
+    "hopKey": "hop_a_o_oa_ough",
+    "commonsTitle": "Open-mid back rounded vowel.ogg",
+    "localFile": "open-mid_back_rounded_vowel.ogg",
+    "ipa": "ɔ",
+    "author": "Denelson83",
+    "license": "GFDL / CC BY-SA",
+    "note": "後中圓唇母音（dog、all 近似）",
+    "sourceUrl": "https://upload.wikimedia.org/wikipedia/commons/0/02/Open-mid_back_rounded_vowel.ogg"
+  },
+  {
+    "hopKey": "hop_y_i_u",
+    "commonsTitle": "Palatal approximant.ogg",
+    "localFile": "palatal_approximant.ogg",
+    "ipa": "j",
+    "author": "Denelson83",
+    "license": "GFDL / CC BY-SA",
+    "note": "半母音滑音（you）",
+    "sourceUrl": "https://upload.wikimedia.org/wikipedia/commons/e/e8/Palatal_approximant.ogg"
+  }
+]

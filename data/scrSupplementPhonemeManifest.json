@@ -1,0 +1,145 @@
+[
+  {
+    "key": "oo",
+    "variant": "short",
+    "localFile": "oo_short.ogg",
+    "commonsTitle": "Near-close near-back rounded vowel.ogg",
+    "ipa": "ʊ",
+    "author": "Denelson83",
+    "license": "GFDL / CC BY-SA",
+    "note": "短 oo（look），取代錯用短 u /ʌ/",
+    "sourceUrl": "https://upload.wikimedia.org/wikipedia/commons/d/d5/Near-close_near-back_rounded_vowel.ogg"
+  },
+  {
+    "key": "ow",
+    "variant": "long",
+    "localFile": "ow_long.ogg",
+    "commonsTitle": "Close-mid back rounded vowel.ogg",
+    "ipa": "oʊ",
+    "author": "Denelson83",
+    "license": "GFDL / CC BY-SA",
+    "note": "長 ow / boat（與 /aʊ/ house 分開）",
+    "sourceUrl": "https://upload.wikimedia.org/wikipedia/commons/8/84/Close-mid_back_rounded_vowel.ogg"
+  },
+  {
+    "key": "oa",
+    "variant": "default",
+    "localFile": "oa.ogg",
+    "commonsTitle": "Close-mid back rounded vowel.ogg",
+    "ipa": "oʊ",
+    "author": "Denelson83",
+    "license": "GFDL / CC BY-SA",
+    "note": "長 ow / boat（與 /aʊ/ house 分開）",
+    "sourceUrl": "https://upload.wikimedia.org/wikipedia/commons/8/84/Close-mid_back_rounded_vowel.ogg"
+  },
+  {
+    "key": "o",
+    "variant": "magic_e",
+    "localFile": "o-e.ogg",
+    "commonsTitle": "Close-mid back rounded vowel.ogg",
+    "ipa": "oʊ",
+    "author": "Denelson83",
+    "license": "GFDL / CC BY-SA",
+    "note": "長 ow / boat（與 /aʊ/ house 分開）",
+    "sourceUrl": "https://upload.wikimedia.org/wikipedia/commons/8/84/Close-mid_back_rounded_vowel.ogg"
+  },
+  {
+    "key": "ee",
+    "variant": "default",
+    "localFile": "ee.ogg",
+    "commonsTitle": "Close front unrounded vowel.ogg",
+    "ipa": "iː",
+    "author": "Denelson83",
+    "license": "GFDL / CC BY-SA",
+    "note": "長母音 ee / ea / ie / ey",
+    "sourceUrl": "https://upload.wikimedia.org/wikipedia/commons/9/91/Close_front_unrounded_vowel.ogg"
+  },
+  {
+    "key": "ea",
+    "variant": "default",
+    "localFile": "ea.ogg",
+    "commonsTitle": "Close front unrounded vowel.ogg",
+    "ipa": "iː",
+    "author": "Denelson83",
+    "license": "GFDL / CC BY-SA",
+    "note": "長母音 ee / ea / ie / ey",
+    "sourceUrl": "https://upload.wikimedia.org/wikipedia/commons/9/91/Close_front_unrounded_vowel.ogg"
+  },
+  {
+    "key": "ie",
+    "variant": "default",
+    "localFile": "ie.ogg",
+    "commonsTitle": "Close front unrounded vowel.ogg",
+    "ipa": "iː",
+    "author": "Denelson83",
+    "license": "GFDL / CC BY-SA",
+    "note": "長母音 ee / ea / ie / ey",
+    "sourceUrl": "https://upload.wikimedia.org/wikipedia/commons/9/91/Close_front_unrounded_vowel.ogg"
+  },
+  {
+    "key": "ey",
+    "variant": "default",
+    "localFile": "ey.ogg",
+    "commonsTitle": "Close front unrounded vowel.ogg",
+    "ipa": "iː",
+    "author": "Denelson83",
+    "license": "GFDL / CC BY-SA",
+    "note": "長母音 ee / ea / ie / ey",
+    "sourceUrl": "https://upload.wikimedia.org/wikipedia/commons/9/91/Close_front_unrounded_vowel.ogg"
+  },
+  {
+    "key": "igh",
+    "variant": "default",
+    "localFile": "igh.ogg",
+    "commonsTitle": "En-us-i.ogg",
+    "ipa": "aɪ",
+    "author": "Dvortygirl",
+    "license": "CC BY-SA 3.0",
+    "note": "igh / i-e / 母音 y（sky）；檔名 y_vowel 避免覆蓋字母 y",
+    "sourceUrl": "https://upload.wikimedia.org/wikipedia/commons/d/de/En-us-i.ogg"
+  },
+  {
+    "key": "i",
+    "variant": "magic_e",
+    "localFile": "i-e.ogg",
+    "commonsTitle": "En-us-i.ogg",
+    "ipa": "aɪ",
+    "author": "Dvortygirl",
+    "license": "CC BY-SA 3.0",
+    "note": "igh / i-e / 母音 y（sky）；檔名 y_vowel 避免覆蓋字母 y",
+    "sourceUrl": "https://upload.wikimedia.org/wikipedia/commons/d/de/En-us-i.ogg"
+  },
+  {
+    "key": "y",
+    "variant": "vowel",
+    "localFile": "y_vowel.ogg",
+    "commonsTitle": "En-us-i.ogg",
+    "ipa": "aɪ",
+    "author": "Dvortygirl",
+    "license": "CC BY-SA 3.0",
+    "note": "igh / i-e / 母音 y（sky）；檔名 y_vowel 避免覆蓋字母 y",
+    "sourceUrl": "https://upload.wikimedia.org/wikipedia/commons/d/de/En-us-i.ogg"
+  },
+  {
+    "key": "ng",
+    "variant": "default",
+    "localFile": "ng.ogg",
+    "commonsTitle": "Velar nasal.ogg",
+    "ipa": "ŋ",
+    "author": "Peter Isotalo",
+    "license": "CC BY-SA 4.0",
+    "note": "ng / ngue",
+    "sourceUrl": "https://upload.wikimedia.org/wikipedia/commons/3/39/Velar_nasal.ogg"
+  },
+  {
+    "key": "ngue",
+    "variant": "default",
+    "localFile": "ngue.ogg",
+    "commonsTitle": "Velar nasal.ogg",
+    "ipa": "ŋ",
+    "author": "Peter Isotalo",
+    "license": "CC BY-SA 4.0",
+    "note": "ng / ngue",
+    "sourceUrl": "https://upload.wikimedia.org/wikipedia/commons/3/39/Velar_nasal.ogg"
+  }
+]

@@ -482,6 +482,82 @@ export const CURATED_WORDS: Record<string, PhonicsBlock[]> = {
     { text: 'd', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 'd' },
     { text: 'ew', type: 'long_vowel', soundRule: 'Vowel Teams', phoneme: 'juː' },
   ],
+  look: [
+    { text: 'l', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 'l' },
+    { text: 'oo', type: 'short_vowel', soundRule: 'Short Vowel', phoneme: 'ʊ' },
+    { text: 'k', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 'k' },
+  ],
+  bush: [
+    { text: 'b', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 'b' },
+    { text: 'u', type: 'short_vowel', soundRule: 'Short Vowel', phoneme: 'ʊ' },
+    { text: 'sh', type: 'digraph', soundRule: 'Digraphs', phoneme: 'ʃ' },
+  ],
+  would: [
+    { text: 'w', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 'w' },
+    { text: 'ou', type: 'short_vowel', soundRule: 'Short Vowel', phoneme: 'ʊ' },
+    { text: 'ld', type: 'blend', soundRule: 'Final Blends', phoneme: 'ld' },
+  ],
+  cool: [
+    { text: 'c', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 'k' },
+    { text: 'oo', type: 'long_vowel', soundRule: 'Vowel Teams', phoneme: 'uː' },
+    { text: 'l', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 'l' },
+  ],
+  soup: [
+    { text: 's', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 's' },
+    { text: 'ou', type: 'long_vowel', soundRule: 'Vowel Teams', phoneme: 'uː' },
+    { text: 'p', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 'p' },
+  ],
+  stew: [
+    { text: 'st', type: 'blend', soundRule: 'Initial Blends', phoneme: 'st' },
+    { text: 'ew', type: 'long_vowel', soundRule: 'Vowel Teams', phoneme: 'uː' },
+  ],
+  tune: [
+    { text: 't', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 't' },
+    { text: 'u', type: 'long_vowel', soundRule: 'Magic E', phoneme: 'juː' },
+    { text: 'n', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 'n' },
+    { text: 'e', type: 'silent_e', soundRule: 'Magic E', phoneme: '' },
+  ],
+  tea: [
+    { text: 't', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 't' },
+    { text: 'ea', type: 'long_vowel', soundRule: 'Vowel Teams', phoneme: 'iː' },
+  ],
+  grief: [
+    { text: 'gr', type: 'blend', soundRule: 'Initial Blends', phoneme: 'gr' },
+    { text: 'ie', type: 'long_vowel', soundRule: 'Vowel Teams', phoneme: 'iː' },
+    { text: 'f', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 'f' },
+  ],
+  light: [
+    { text: 'l', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 'l' },
+    { text: 'igh', type: 'long_vowel', soundRule: 'Vowel Teams', phoneme: 'aɪ' },
+    { text: 't', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 't' },
+  ],
+  sky: [
+    { text: 'sk', type: 'blend', soundRule: 'Initial Blends', phoneme: 'sk' },
+    { text: 'y', type: 'long_vowel', soundRule: 'Vowel Teams', phoneme: 'aɪ' },
+  ],
+  no: [
+    { text: 'n', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 'n' },
+    { text: 'o', type: 'long_vowel', soundRule: 'Vowel Teams', phoneme: 'oʊ' },
+  ],
+  tongue: [
+    { text: 't', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 't' },
+    { text: 'o', type: 'short_vowel', soundRule: 'Short Vowel', phoneme: 'ʌ' },
+    { text: 'ng', type: 'digraph', soundRule: 'Digraphs', phoneme: 'ŋ' },
+    { text: 'ue', type: 'long_vowel', soundRule: 'Vowel Teams', phoneme: 'uː' },
+  ],
+  thin: [
+    { text: 'th', type: 'consonant', soundRule: 'Digraphs', phoneme: 'θ' },
+    { text: 'i', type: 'short_vowel', soundRule: 'Short Vowel', phoneme: 'ɪ' },
+    { text: 'n', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 'n' },
+  ],
+  me: [
+    { text: 'm', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 'm' },
+    { text: 'e', type: 'long_vowel', soundRule: 'Vowel Teams', phoneme: 'iː' },
+  ],
+  key: [
+    { text: 'k', type: 'consonant', soundRule: 'Basic Consonant', phoneme: 'k' },
+    { text: 'ey', type: 'long_vowel', soundRule: 'Vowel Teams', phoneme: 'iː' },
+  ],
 };
 
 /** @deprecated 課程單字改由 data/curriculum 驅動；保留供向後相容 */

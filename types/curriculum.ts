@@ -1,8 +1,27 @@
 export type UnitId =
+  | 'start'
+  | 'cvc'
+  | 'advanced'
+  | 'alt_spellings'
+  /** @deprecated 舊版相容 */
+  | 'early_blend'
+  | 'cvc_expand'
+  | 'digraphs'
+  | 'long_vowel'
+  | 'hop_rules'
+  | 'blending'
   | 'consonants_voiced'
   | 'consonants_voiceless'
-  | 'vowels'
-  | 'blending';
+  | 'vowels';
+
+export type PhaseId = 1 | 2 | 3 | 4 | 5;
+
+export type LessonStep =
+  | 'phoneme'
+  | 'grapheme'
+  | 'examples'
+  | 'word_lab'
+  | 'spelling';
 
 export type ActivityType =
   | 'letter_group'
@@ -10,7 +29,9 @@ export type ActivityType =
   | 'grapheme'
   | 'blend'
   | 'segment'
-  | 'sight_word';
+  | 'sight_word'
+  | 'decodable_sentences'
+  | 'decode_word';
 
 export type WordOrderMode = 'sequential' | 'random';
 
@@ -28,12 +49,12 @@ export interface BlendIntroContent {
 
 export interface GraphemeContent {
   kind: 'grapheme';
-  /** Hop English 發音規則 key，如 hop_d_dd */
   patternKey: string;
   graphemes: string[];
   words: string[];
   wordOrder?: WordOrderMode;
   ruleHint?: string;
+  lessonSteps?: LessonStep[];
 }
 
 export interface BlendContent {
@@ -50,6 +71,17 @@ export interface SegmentContent {
 export interface SightWordContent {
   kind: 'sight_word';
   words: string[];
+  phase?: number;
+}
+
+export interface DecodableSentenceContent {
+  kind: 'decodable_sentences';
+  sentences: string[];
+  phase: number;
+}
+
+export interface DecodeWordContent {
+  kind: 'decode_word';
 }
 
 export type ActivityContent =
@@ -58,7 +90,9 @@ export type ActivityContent =
   | GraphemeContent
   | BlendContent
   | SegmentContent
-  | SightWordContent;
+  | SightWordContent
+  | DecodableSentenceContent
+  | DecodeWordContent;
 
 export interface Activity {
   id: string;
@@ -90,7 +124,7 @@ export interface Unit {
 }
 
 export interface Curriculum {
-  version: '2.0.0' | '3.0.0';
+  version: '2.0.0' | '3.0.0' | '5.0.0' | '6.0.0';
   units: Unit[];
   lessons: Lesson[];
 }

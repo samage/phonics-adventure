@@ -221,3 +221,23 @@ export function parseWordToBlocks(word: string): PhonicsBlock[] {
 
   return blocks;
 }
+
+export interface DecodeWordResult {
+  word: string;
+  blocks: PhonicsBlock[];
+  fromCurated: boolean;
+  decodable: boolean;
+}
+
+/** 自由輸入生字：回傳拆音結果與是否來自白名單 */
+export function decodeWordAnalysis(word: string): DecodeWordResult {
+  const clean = (word ?? '').toLowerCase().replace(/[^a-z]/g, '');
+  const fromCurated = Boolean(clean && CURATED_WORDS[clean]);
+  const blocks = parseWordToBlocks(clean);
+  return {
+    word: clean,
+    blocks,
+    fromCurated,
+    decodable: blocks.length > 0,
+  };
+}
