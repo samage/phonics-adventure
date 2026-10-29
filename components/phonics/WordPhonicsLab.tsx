@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import WordSoundDots, { getSplitDigraphIndices } from '@/components/phonics/WordSoundDots';
 import { BTN_PRIMARY, BTN_PINK, BTN_SECONDARY } from '@/components/ui/PageHeader';
 import { parseWordToBlocks } from '@/utils/phonicsEngine';
-import { speakBlockPhoneme } from '@/lib/letterSound';
+import { isSilentBlock, speakBlockPhoneme } from '@/lib/letterSound';
 import { playBlendDemo } from '@/lib/blendDemoAudio';
 import { speakWord, cancelSpeech } from '@/lib/speech';
 
@@ -41,7 +41,7 @@ export default function WordPhonicsLab({ word, onComplete }: WordPhonicsLabProps
     setStep('sound_talk');
     const playable = blocks
       .map((b, i) => ({ b, i }))
-      .filter(({ b }) => b.type !== 'silent_e');
+      .filter(({ b }) => !isSilentBlock(b));
 
     for (const { b, i } of playable) {
       setActiveIndex(i);
@@ -56,7 +56,7 @@ export default function WordPhonicsLab({ word, onComplete }: WordPhonicsLabProps
     cancelSpeech();
     setPlaying(true);
     setStep('blend');
-    const playable = blocks.filter((b) => b.type !== 'silent_e');
+    const playable = blocks.filter((b) => !isSilentBlock(b));
     if (playable.length >= 2) {
       await playBlendDemo(word, (h) => {
         if (h === 'onset') setActiveIndex(blocks.indexOf(playable[0]));
@@ -65,7 +65,7 @@ export default function WordPhonicsLab({ word, onComplete }: WordPhonicsLabProps
       });
     } else {
       for (let i = 0; i < blocks.length; i++) {
-        if (blocks[i].type === 'silent_e') continue;
+        if (isSilentBlock(blocks[i])) continue;
         setActiveIndex(i);
         await speakBlockPhoneme(blocks[i]);
         await delay(280);

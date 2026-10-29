@@ -1,7 +1,10 @@
 /**
  * 語音控制模組。
- * 音素：Sound City Reading 預錄音檔；整字與備援：Web Speech API。
+ * 音素與整字／整句：預錄女聲 mp3（scripts/build_audio.py 產生）。
+ * 只有「沒有預錄檔」的文字（例如自由輸入的生字）才退回裝置的 Web Speech API。
  */
+import audioManifest from '@/data/audioManifest.json';
+import { normalizeSpeechText, speechAudioPath } from '@/lib/speechFiles';
 
 const DEFAULT_LANG = 'en-US';
 const DEFAULT_RATE = 0.75;
@@ -97,8 +100,39 @@ export function cancelSpeech(): void {
   }
 }
 
+const PRERECORDED_TEXTS = new Set<string>([
+  ...((audioManifest as { words?: string[] }).words ?? []),
+  ...((audioManifest as { sentences?: string[] }).sentences ?? []),
+]);
+
+/** 這段文字有沒有預錄音檔 */
+export function hasPrerecordedSpeech(text: string): boolean {
+  return PRERECORDED_TEXTS.has(normalizeSpeechText(text));
+}
+
+const SLOW_PLAYBACK_RATE = 0.6;
+const SLOW_TTS_RATE = 0.45;
+
+/**
+ * 唸出整個字或整句。預錄女聲優先（🐢 慢速用 playbackRate，保持音高），
+ * 沒有預錄檔才用裝置 TTS。
+ */
+export async function speakText(
+  text: string,
+  options: { slow?: boolean } = {},
+): Promise<void> {
+  cancelSpeech();
+  if (hasPrerecordedSpeech(text)) {
+    const ok = await playAudioFile(
+      speechAudioPath(text),
+      options.slow ? SLOW_PLAYBACK_RATE : 1,
+    );
+    if (ok) return;
+  }
+  await speak(text, { rate: options.slow ? SLOW_TTS_RATE : DEFAULT_RATE });
+}
+
 /** 唸出完整單字（流暢、稍慢）。 */
 export function speakWord(word: string): Promise<void> {
-  cancelSpeech();
-  return speak(word, { rate: DEFAULT_RATE });
+  return speakText(word);
 }

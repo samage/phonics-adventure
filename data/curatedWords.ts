@@ -1,5 +1,6 @@
 import type { PhonicsBlock } from '@/types/phonics';
 import { CURATED_BLEND_WORDS } from '@/data/curatedBlendWords';
+import { CURATED_IRREGULAR_WORDS } from '@/data/curatedIrregularWords';
 
 /**
  * 精選教學單字白名單。
@@ -562,3 +563,5 @@ export const CURATED_WORDS: Record<string, PhonicsBlock[]> = {
 };
 
 Object.assign(CURATED_WORDS, CURATED_BLEND_WORDS);
+// 人工校對的不規則字，優先於上面的所有資料
+Object.assign(CURATED_WORDS, CURATED_IRREGULAR_WORDS);

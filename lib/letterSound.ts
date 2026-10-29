@@ -2,7 +2,7 @@ import type { PhonicsBlock } from '@/types/phonics';
 import { getLetterPhonics } from '@/data/letterPhonics';
 import { speakPhoneme } from '@/lib/phonicsAudio';
 
-export { speakBlockPhoneme } from '@/lib/phonicsAudio';
+export { isSilentBlock, speakBlockPhoneme } from '@/lib/phonicsAudio';
 
 /** 單一字母 → 發音積木（沒有收錄時當成一般子音） */
 export function letterToBlock(letter: string): PhonicsBlock {

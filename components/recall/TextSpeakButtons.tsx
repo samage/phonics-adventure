@@ -1,11 +1,9 @@
 'use client';
 
 import { useCallback, useState } from 'react';
-import { speak } from '@/lib/speech';
+import { speakText } from '@/lib/speech';
 
-/** 整個字／整句的 🔊 正常速度＋ 🐢 慢速（TTS，特殊字和短句沒有預錄音） */
-const NORMAL_RATE = 0.75;
-const SLOW_RATE = 0.45;
+/** 整個字／整句的 🔊 正常速度＋ 🐢 慢速（預錄女聲；沒有預錄檔才用裝置 TTS） */
 
 interface TextSpeakButtonsProps {
   /** 要唸的文字（整個字或整句） */
@@ -22,7 +20,7 @@ export default function TextSpeakButtons({ text, onPlayed, label = true }: TextS
       setPlaying(slow ? 'slow' : 'normal');
       onPlayed?.();
       try {
-        await speak(text, { rate: slow ? SLOW_RATE : NORMAL_RATE });
+        await speakText(text, { slow });
       } finally {
         setPlaying(null);
       }

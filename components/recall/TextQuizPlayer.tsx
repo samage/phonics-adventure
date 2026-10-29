@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { getTextItem } from '@/data/recall/textItems';
 import type { TextQuestion } from '@/lib/recall/textQuiz';
-import { speak, speakWord } from '@/lib/speech';
+import { speakText, speakWord } from '@/lib/speech';
 import Mascot from '@/components/mascot/Mascot';
 import TextSpeakButtons from './TextSpeakButtons';
 
@@ -65,7 +65,7 @@ export default function TextQuizPlayer({
       return;
     }
     // 答錯時順便把正確的唸法念給孩子聽（點擊後播放，iPad 也允許）
-    if (!ok) void speak(spoken);
+    if (!ok) void speakText(spoken);
   };
 
   const optionClass = (id: string) => {

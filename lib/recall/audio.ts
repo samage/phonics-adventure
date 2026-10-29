@@ -1,33 +1,21 @@
 /**
  * 「看字母說音」專用的音檔播放：
- * - 一般 key：Sound City Reading 預錄音（mp3 / ogg）
- * - ipa:hop_xxx：Wikimedia IPA 預錄音（er／ir／ur）
+ * - 一般 key：預錄女聲音素（public/audio/phonemes/）
  * - blend:xx：子音連音，逐字母連續播放
  * 🐢 慢速：以 playbackRate 降低速度（保持音高）。
  */
 
-import { ipaAudioPath } from '@/lib/ipaPhonemeAudio';
-import {
-  resolveSoundcityKey,
-  soundcityAudioPath,
-} from '@/lib/phonemeAudio';
-import {
-  hasScrSupplementKey,
-  scrSupplementAudioPath,
-} from '@/lib/scrSupplementAudio';
+import { clipUrl, clipsForKey } from '@/lib/phonemeClips';
 import { cancelSpeech, playAudioFile } from '@/lib/speech';
 
 const SLOW_RATE = 0.6;
 
 /** 回傳單一音檔的網址；blend（多個音檔）或找不到時回傳 null */
 export function resolveRecallAudioUrl(audio: string): string | null {
-  if (audio.startsWith('ipa:')) return ipaAudioPath(audio.slice(4));
   if (audio.startsWith('blend:')) return null;
-  const name = resolveSoundcityKey(audio);
-  if (!name) return null;
-  return hasScrSupplementKey(name)
-    ? scrSupplementAudioPath(name)
-    : soundcityAudioPath(name);
+  const { clips, missing } = clipsForKey(audio);
+  if (clips.length !== 1 || missing.length > 0) return null;
+  return clipUrl(clips[0] as string);
 }
 
 /** blend 會用到的字母音檔 key（逐字母） */

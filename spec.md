@@ -8,7 +8,7 @@
 
 介面主題為原創吉祥物「雲寶」＋天空藍白、雲朵、星星與甜點，**所有頁面一致**（只用 sky／pink 兩組色階，不做全域色階覆寫）。
 
-**音檔：** Sound City Reading 真人音素、Wikimedia IPA；無檔時 Web Speech 備援。
+**音檔：** 全部預錄女聲：Sound City Reading 真人音素（38）＋ Kokoro `af_nova` 合成母音（8）＋ 整字／短句（316）；裝置 TTS 只當最後備援。
 
 ## 二、課程架構 v8.0.0
 
@@ -106,13 +106,20 @@
 
 | 情境 | 音源 |
 | --- | --- |
-| 單音素 | `/audio/soundcity/` |
-| 長 a、ai、oo 等 | `/audio/ipa/`、supplement manifest |
-| 連音 | `blend:xx` — 逐字母依序播放 |
-| 其餘 | SCR 近似音素 → TTS |
+| 單音素（46 個） | `/audio/phonemes/<id>.mp3`；SCR 女聲 38 個，Kokoro `af_nova` 母音 8 個（oo 長短、aw、er、ar、or、air、ə） |
+| 音素對應 | `lib/phonemeClips.ts`：IPA 音素精確比對（`aʊ`≠`ʊ`），`data/phonemeClips.json` 描述每個檔案的來源與裁切方式 |
+| 連音 | `blend:xx` — 逐字母依序播放對應的音素檔 |
+| 混音／整字／短句 | `/audio/speech/<slug>.mp3`（Kokoro `af_nova`，由課程資料自動匯出），🐢 慢速為播放速率 0.6 |
+| 沒有檔案的 ʒ、自由輸入的字 | 裝置 TTS（最後備援） |
+
+後製：`scripts/build_audio.py` 裁掉前後靜音（保留約 30 ms）、響度正規化到 −20 LUFS；子音不使用 TTS 合成。不規則字（come、what、word…）的切片見 `data/curatedIrregularWords.ts`。
+
+授權：Kokoro 權重 Apache-2.0（訓練資料含 CC BY 素材，見 README）；SCR 錄音版權屬原作者，請依其網站條款使用；Wikimedia 男聲與舊的 soundcity／ipa 目錄、manifest 已移除。
 
 ```bash
-npm run download:audio
+pip install -r scripts/requirements-audio.txt
+npm run export:speech-texts
+npm run build:audio
 ```
 
 ## 五、進度與遷移
