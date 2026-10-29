@@ -1,15 +1,24 @@
 import LearningMap from '@/components/learn/LearningMap';
+import HomeEntries from '@/components/home/HomeEntries';
+import Mascot from '@/components/mascot/Mascot';
+import { Star } from '@/components/mascot/Decor';
 
 export default function Home() {
   return (
-    <main className="flex flex-1 flex-col items-center gap-10 p-6">
-      <header className="flex flex-col items-center gap-3 text-center">
-        <div className="animate-float text-7xl">📚</div>
-        <h1 className="text-5xl font-bold tracking-wide text-amber-600 drop-shadow-sm md:text-6xl">
+    <main className="flex flex-1 flex-col items-center gap-7 p-5">
+      <header className="flex flex-col items-center gap-1 text-center">
+        <div className="relative">
+          <Star size={26} className="absolute -left-6 top-2 animate-float" />
+          <Star size={18} className="absolute -right-5 top-8 animate-float" />
+          <Mascot mood="happy" size={150} />
+        </div>
+        <h1 className="text-4xl font-bold tracking-wide text-sky-600 drop-shadow-sm md:text-5xl">
           Phonics Adventure
         </h1>
+        <p className="text-base text-sky-700">跟雲寶一起，看到字母就會唸 ☁️</p>
       </header>
 
+      <HomeEntries />
       <LearningMap />
     </main>
   );

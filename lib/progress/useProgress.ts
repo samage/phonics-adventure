@@ -1,58 +1,55 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo, useSyncExternalStore } from 'react';
 import type { UnitId } from '@/types/curriculum';
-import { DEFAULT_PROGRESS, type UserProgress } from '@/types/progress';
-import { createProgressHelpers } from './ProgressStore';
+import type { PlacementResult } from '@/lib/placement/placement';
+import { getDueCount, getDueIds, createProgressHelpers } from './ProgressStore';
 import { getProgressStore } from './LocalProgressStore';
+import type { ReviewOutcome } from '@/lib/review/scheduler';
+import { todayString } from '@/lib/review/scheduler';
 
-function cloneDefaultProgress(): UserProgress {
-  return {
-    ...DEFAULT_PROGRESS,
-    completedLessons: [],
-    wordStats: {},
-  };
-}
+const noopSubscribe = () => () => {};
 
 export function useProgress() {
   const store = getProgressStore();
-  const [progress, setProgress] = useState<UserProgress>(cloneDefaultProgress);
-  const [hydrated, setHydrated] = useState(false);
 
-  const helpers = useMemo(
-    () => createProgressHelpers(() => progress),
-    [progress],
+  // 進度存在 localStorage：伺服器端渲染時給空進度，瀏覽器端用真實進度。
+  const progress = useSyncExternalStore(
+    store.subscribe,
+    store.getSnapshot,
+    store.getServerSnapshot,
+  );
+  // 伺服器與 hydration 期間為 false，hydration 完成後為 true
+  const hydrated = useSyncExternalStore(
+    noopSubscribe,
+    () => true,
+    () => false,
   );
 
-  useEffect(() => {
-    setProgress(store.getProgress());
-    setHydrated(true);
-  }, [store]);
+  const helpers = useMemo(() => createProgressHelpers(() => progress), [progress]);
 
   const completeLesson = useCallback(
-    (lessonId: string) => {
-      const next = store.completeLesson(lessonId);
-      setProgress(next);
-      return next;
-    },
+    (lessonId: string) => store.completeLesson(lessonId),
     [store],
   );
 
   const setCurrentLesson = useCallback(
-    (lessonId: string | null) => {
-      const next = store.setCurrentLesson(lessonId);
-      setProgress(next);
-      return next;
-    },
+    (lessonId: string | null) => store.setCurrentLesson(lessonId),
     [store],
   );
 
   const recordWordAttempt = useCallback(
-    (word: string, correct: boolean) => {
-      const next = store.recordWordAttempt(word, correct);
-      setProgress(next);
-      return next;
-    },
+    (word: string, correct: boolean) => store.recordWordAttempt(word, correct),
+    [store],
+  );
+
+  const recordGraphemeOutcome = useCallback(
+    (itemId: string, outcome: ReviewOutcome) => store.recordGraphemeOutcome(itemId, outcome),
+    [store],
+  );
+
+  const applyPlacementResult = useCallback(
+    (result: PlacementResult) => store.applyPlacementResult(result),
     [store],
   );
 
@@ -71,9 +68,13 @@ export function useProgress() {
     [helpers],
   );
 
-  const getOverallProgress = useCallback(
-    () => helpers.getOverallProgress(),
-    [helpers],
+  const getOverallProgress = useCallback(() => helpers.getOverallProgress(), [helpers]);
+
+  /** 今天要複習的項目數（只在瀏覽器端有意義；hydrated 之前為 0） */
+  const dueToday = hydrated ? getDueCount(progress, todayString()) : 0;
+  const dueTodayIds = useCallback(
+    (limit?: number) => getDueIds(store.getSnapshot(), todayString(), limit),
+    [store],
   );
 
   return {
@@ -82,9 +83,13 @@ export function useProgress() {
     completeLesson,
     setCurrentLesson,
     recordWordAttempt,
+    recordGraphemeOutcome,
+    applyPlacementResult,
     isLessonCompleted,
     isLessonUnlocked,
     getUnitProgress,
     getOverallProgress,
+    dueToday,
+    dueTodayIds,
   };
 }

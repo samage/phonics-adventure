@@ -1,97 +1,46 @@
 import {
-  DEFAULT_PROGRESS,
-  LEGACY_PROGRESS_STORAGE_KEY,
-  LEGACY_PROGRESS_V4_KEY,
   PROGRESS_STORAGE_KEY,
+  createDefaultProgress,
   type UserProgress,
 } from '@/types/progress';
-import { migrateLessonIdFromLegacy } from '@/data/curriculum';
 import type { UnitId } from '@/types/curriculum';
+import type { ReviewOutcome } from '@/lib/review/scheduler';
+import type { PlacementResult } from '@/lib/placement/placement';
 import {
   applyCompleteLesson,
+  applyGraphemeOutcome,
+  applyPlacement,
   applyRecordWordAttempt,
   createProgressHelpers,
   type ProgressStore,
 } from './ProgressStore';
-
-function migrateLessonIds(
-  lessonIds: string[],
-  source: 'v4' | 'v5',
-): string[] {
-  return lessonIds.map((id) => migrateLessonIdFromLegacy(id, source));
-}
-
-function migrateProgress(
-  raw: UserProgress,
-  source: 'v4' | 'v5',
-): UserProgress {
-  return {
-    ...raw,
-    completedLessons: migrateLessonIds(raw.completedLessons, source),
-    currentLessonId: raw.currentLessonId
-      ? migrateLessonIdFromLegacy(raw.currentLessonId, source)
-      : null,
-  };
-}
+import { loadProgress } from './migrate';
 
 function loadFromStorage(): UserProgress {
-  if (typeof window === 'undefined') return { ...DEFAULT_PROGRESS };
+  if (typeof window === 'undefined') return createDefaultProgress();
   try {
-    const rawV6 = localStorage.getItem(PROGRESS_STORAGE_KEY);
-    if (rawV6) {
-      const parsed = JSON.parse(rawV6) as UserProgress;
-      return {
-        completedLessons: Array.isArray(parsed.completedLessons)
-          ? parsed.completedLessons
-          : [],
-        currentLessonId: parsed.currentLessonId ?? null,
-        wordStats: parsed.wordStats ?? {},
-        lastPlayedAt: parsed.lastPlayedAt ?? '',
-      };
+    const loaded = loadProgress((key) => localStorage.getItem(key));
+    if (loaded.needsPersist) {
+      localStorage.setItem(PROGRESS_STORAGE_KEY, JSON.stringify(loaded.progress));
     }
-
-    const rawV5 = localStorage.getItem(LEGACY_PROGRESS_STORAGE_KEY);
-    if (rawV5) {
-      const parsed = JSON.parse(rawV5) as UserProgress;
-      const migrated = migrateProgress({
-        completedLessons: Array.isArray(parsed.completedLessons)
-          ? parsed.completedLessons
-          : [],
-        currentLessonId: parsed.currentLessonId ?? null,
-        wordStats: parsed.wordStats ?? {},
-        lastPlayedAt: parsed.lastPlayedAt ?? '',
-      }, 'v5');
-      localStorage.setItem(PROGRESS_STORAGE_KEY, JSON.stringify(migrated));
-      return migrated;
-    }
-
-    const rawV4 = localStorage.getItem(LEGACY_PROGRESS_V4_KEY);
-    if (rawV4) {
-      const parsed = JSON.parse(rawV4) as UserProgress;
-      const migrated = migrateProgress({
-        completedLessons: Array.isArray(parsed.completedLessons)
-          ? parsed.completedLessons
-          : [],
-        currentLessonId: parsed.currentLessonId ?? null,
-        wordStats: parsed.wordStats ?? {},
-        lastPlayedAt: parsed.lastPlayedAt ?? '',
-      }, 'v4');
-      localStorage.setItem(PROGRESS_STORAGE_KEY, JSON.stringify(migrated));
-      return migrated;
-    }
-
-    return { ...DEFAULT_PROGRESS };
+    return loaded.progress;
   } catch {
-    return { ...DEFAULT_PROGRESS };
+    return createDefaultProgress();
   }
 }
 
 function saveToStorage(progress: UserProgress): void {
   if (typeof window === 'undefined') return;
-  localStorage.setItem(PROGRESS_STORAGE_KEY, JSON.stringify(progress));
+  try {
+    localStorage.setItem(PROGRESS_STORAGE_KEY, JSON.stringify(progress));
+  } catch {
+    // 儲存空間滿了或被瀏覽器擋住（隱私模式）：這次先留在記憶體，不要讓畫面壞掉
+  }
 }
 
 let memoryCache: UserProgress | null = null;
+const listeners = new Set<() => void>();
+const SERVER_SNAPSHOT: UserProgress = createDefaultProgress();
 
 export class LocalProgressStore implements ProgressStore {
   private get progress(): UserProgress {
@@ -102,12 +51,27 @@ export class LocalProgressStore implements ProgressStore {
   private set progress(value: UserProgress) {
     memoryCache = value;
     saveToStorage(value);
+    listeners.forEach((l) => l());
   }
 
+  /** useSyncExternalStore 用：訂閱進度變化 */
+  subscribe = (listener: () => void): (() => void) => {
+    listeners.add(listener);
+    return () => listeners.delete(listener);
+  };
+
+  /** useSyncExternalStore 用：目前進度（不可變物件，改動時才換新參考） */
+  getSnapshot = (): UserProgress => this.progress;
+
+  getServerSnapshot = (): UserProgress => SERVER_SNAPSHOT;
+
   getProgress(): UserProgress {
+    const p = this.progress;
     return {
-      ...this.progress,
-      completedLessons: [...this.progress.completedLessons],
+      ...p,
+      completedLessons: [...p.completedLessons],
+      wordStats: { ...p.wordStats },
+      review: { ...p.review },
     };
   }
 
@@ -116,24 +80,31 @@ export class LocalProgressStore implements ProgressStore {
   }
 
   completeLesson(lessonId: string): UserProgress {
-    const next = applyCompleteLesson(this.progress, lessonId);
-    this.progress = next;
+    this.progress = applyCompleteLesson(this.progress, lessonId);
     return this.getProgress();
   }
 
   setCurrentLesson(lessonId: string | null): UserProgress {
-    const next = {
+    this.progress = {
       ...this.progress,
       currentLessonId: lessonId,
       lastPlayedAt: new Date().toISOString(),
     };
-    this.progress = next;
     return this.getProgress();
   }
 
   recordWordAttempt(word: string, correct: boolean): UserProgress {
-    const next = applyRecordWordAttempt(this.progress, word, correct);
-    this.progress = next;
+    this.progress = applyRecordWordAttempt(this.progress, word, correct);
+    return this.getProgress();
+  }
+
+  recordGraphemeOutcome(itemId: string, outcome: ReviewOutcome): UserProgress {
+    this.progress = applyGraphemeOutcome(this.progress, itemId, outcome);
+    return this.getProgress();
+  }
+
+  applyPlacementResult(result: PlacementResult): UserProgress {
+    this.progress = applyPlacement(this.progress, result);
     return this.getProgress();
   }
 
@@ -154,7 +125,7 @@ export class LocalProgressStore implements ProgressStore {
   }
 
   resetProgress(): void {
-    this.progress = { ...DEFAULT_PROGRESS };
+    this.progress = createDefaultProgress();
   }
 }
 
@@ -179,6 +150,12 @@ export class ApiProgressStore implements ProgressStore {
     throw new Error('ApiProgressStore not implemented');
   }
   recordWordAttempt(): UserProgress {
+    throw new Error('ApiProgressStore not implemented');
+  }
+  recordGraphemeOutcome(): UserProgress {
+    throw new Error('ApiProgressStore not implemented');
+  }
+  applyPlacementResult(): UserProgress {
     throw new Error('ApiProgressStore not implemented');
   }
   isLessonCompleted(): boolean {

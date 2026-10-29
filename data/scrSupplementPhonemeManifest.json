@@ -141,5 +141,16 @@
     "license": "CC BY-SA 4.0",
     "note": "ng / ngue",
     "sourceUrl": "https://upload.wikimedia.org/wikipedia/commons/3/39/Velar_nasal.ogg"
+  },
+  {
+    "key": "oo",
+    "variant": "long",
+    "localFile": "oo.ogg",
+    "commonsTitle": "Close back rounded vowel.ogg（推定，與 ee、oa 同系列）",
+    "ipa": "uː",
+    "author": "Denelson83（推定）",
+    "license": "GFDL / CC BY-SA",
+    "note": "長 oo（moon）。檔案原本就在 repo 但漏列於 manifest，導致 oo／ew 課一直退回 TTS；Phase 1 補回。來源待確認。",
+    "sourceUrl": ""
   }
 ]

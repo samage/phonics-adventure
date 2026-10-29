@@ -19,8 +19,9 @@ const HOP_SOUNDCITY_MAP: Record<string, string | string[]> = {
   hop_th_voiced: 'th_voiced',
   hop_th_combined: ['th_voiceless', 'th_voiced'],
   hop_ng_n_ngue: 'ng',
+  hop_ck: 'k',
   hop_ee_ea_ie_e_ey: 'ee',
-  hop_ai_ay_ae: 'ai',
+  hop_ai_ay_ae: 'a_long',
   hop_igh_ie_y_i_ie: 'igh',
   hop_oa_ow_o_oe: 'oa',
   hop_oo_ou_ew_ue: 'oo',
@@ -57,7 +58,7 @@ const HOP_TTS_PHONEME: Record<string, string> = {};
 /** spellings 解析後的 supplement / SCR 後備 */
 const LONG_VOWEL_AUDIO: Record<string, string> = {
   hop_ee_ea_ie_e_ey: 'ee',
-  hop_ai_ay_ae: 'ai',
+  hop_ai_ay_ae: 'a_long',
   hop_igh_ie_y_i_ie: 'igh',
   hop_oa_ow_o_oe: 'oa',
   hop_oo_ou_ew_ue: 'oo',

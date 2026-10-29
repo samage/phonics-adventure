@@ -9,14 +9,14 @@ export default function LearningMap() {
 
   return (
     <div className="flex w-full max-w-2xl flex-col gap-6">
-      <div className="rounded-3xl bg-white/80 p-6 text-center shadow-sm">
-        <p className="text-4xl font-bold text-amber-600">
+      <div className="rounded-3xl bg-white/90 p-6 text-center shadow-md">
+        <p className="text-4xl font-bold text-sky-600">
           {hydrated ? `${overall.completed} / ${overall.total}` : '— / —'}
-          <span className="ml-2 text-xl font-normal text-amber-800/70">堂</span>
+          <span className="ml-2 text-xl font-normal text-sky-800/70">堂</span>
         </p>
-        <div className="mx-auto mt-3 h-3 max-w-md overflow-hidden rounded-full bg-amber-100">
+        <div className="mx-auto mt-3 h-3 max-w-md overflow-hidden rounded-full bg-sky-100">
           <div
-            className="h-full rounded-full bg-amber-400 transition-all duration-500"
+            className="h-full rounded-full bg-sky-400 transition-all duration-500"
             style={{
               width:
                 hydrated && overall.total > 0
@@ -31,7 +31,7 @@ export default function LearningMap() {
 
       <a
         href="/play/decode"
-        className="rounded-2xl border-2 border-purple-200 bg-purple-50 px-6 py-4 text-center text-lg font-semibold text-purple-900 hover:bg-purple-100"
+        className="rounded-3xl bg-white/90 px-6 py-4 text-center text-lg font-semibold text-purple-800 shadow-md hover:bg-white"
       >
         試唸生字 → Sound buttons · 切音 · 混音
       </a>

@@ -1,23 +1,66 @@
 @import "tailwindcss";
 
+/*
+ * 雲寶主題：天空藍＋白色的粉彩配色、雲朵與星星、咖啡廳甜點、圓潤字型、柔和陰影。
+ * 專案裡原本用的 amber（暖橘）與 purple（紫）色階，在這裡整組換成粉彩版本，
+ * 這樣所有既有畫面一次就換好，不用逐檔修改。
+ */
 :root {
-  --background: #fff7ed;
-  --foreground: #3a2a18;
+  --background: #eaf6ff;
+  --foreground: #25466b;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-rounded), "Comic Sans MS", "Arial Rounded MT Bold",
-    Arial, sans-serif;
+  --font-sans: var(--font-rounded), var(--font-zh-rounded), "Hiragino Maru Gothic ProN",
+    "PingFang TC", "Microsoft JhengHei", "Arial Rounded MT Bold", Arial, sans-serif;
+}
+
+@theme {
+  /* amber → 天空藍 */
+  --color-amber-50: #f2faff;
+  --color-amber-100: #e0f2fe;
+  --color-amber-200: #bfe6fb;
+  --color-amber-300: #93d3f5;
+  --color-amber-400: #62bcee;
+  --color-amber-500: #3ea5e6;
+  --color-amber-600: #2b8ed1;
+  --color-amber-700: #2373b0;
+  --color-amber-800: #1f5a8c;
+  --color-amber-900: #1c4a73;
+  --color-amber-950: #12304b;
+
+  /* purple → 薰衣草粉藍 */
+  --color-purple-50: #f6f3ff;
+  --color-purple-100: #ebe5ff;
+  --color-purple-200: #dacfff;
+  --color-purple-300: #c3b2fb;
+  --color-purple-400: #a994f2;
+  --color-purple-500: #8f78e4;
+  --color-purple-600: #7a62d0;
+  --color-purple-700: #664eb0;
+  --color-purple-800: #523f8c;
+  --color-purple-900: #40326c;
+
+  /* 柔和的藍色陰影 */
+  --shadow-sm: 0 2px 6px rgba(80, 140, 200, 0.16);
+  --shadow-md: 0 6px 16px rgba(80, 140, 200, 0.2);
+  --shadow-lg: 0 12px 28px rgba(80, 140, 200, 0.24);
 }
 
 body {
-  background:
-    radial-gradient(circle at 20% 20%, #ffe0b2 0%, transparent 45%),
-    radial-gradient(circle at 80% 0%, #b3e5fc 0%, transparent 40%),
-    radial-gradient(circle at 50% 100%, #c8e6c9 0%, transparent 45%),
-    var(--background);
+  background-color: var(--background);
+  background-image:
+    radial-gradient(ellipse 120px 46px at 12% 9%, rgba(255, 255, 255, 0.95) 0 60%, transparent 62%),
+    radial-gradient(ellipse 80px 32px at 19% 7%, rgba(255, 255, 255, 0.95) 0 60%, transparent 62%),
+    radial-gradient(ellipse 150px 54px at 88% 16%, rgba(255, 255, 255, 0.9) 0 60%, transparent 62%),
+    radial-gradient(ellipse 100px 38px at 78% 14%, rgba(255, 255, 255, 0.9) 0 60%, transparent 62%),
+    radial-gradient(ellipse 140px 50px at 8% 62%, rgba(255, 255, 255, 0.75) 0 60%, transparent 62%),
+    radial-gradient(ellipse 130px 48px at 94% 78%, rgba(255, 255, 255, 0.75) 0 60%, transparent 62%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160' viewBox='0 0 160 160'%3E%3Cpath d='M30 22l2.4 5.6 6 .6-4.6 4 1.4 6-5.2-3.2-5.2 3.2 1.4-6-4.6-4 6-.6z' fill='%23fff3b8' opacity='.9'/%3E%3Cpath d='M118 96l1.8 4.2 4.6.4-3.5 3 1.1 4.5-4-2.4-4 2.4 1.1-4.5-3.5-3 4.6-.4z' fill='%23ffd9e6' opacity='.9'/%3E%3Ccircle cx='96' cy='30' r='2' fill='%23fff' opacity='.9'/%3E%3Ccircle cx='44' cy='118' r='2' fill='%23fff' opacity='.9'/%3E%3C/svg%3E"),
+    linear-gradient(180deg, #d8efff 0%, #eaf6ff 38%, #fdf3fa 100%);
+  background-attachment: fixed;
   color: var(--foreground);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
@@ -51,10 +94,10 @@ body {
 @keyframes glow-pulse {
   0%,
   100% {
-    box-shadow: 0 0 0 0 rgba(255, 213, 79, 0.6);
+    box-shadow: 0 0 0 0 rgba(255, 224, 138, 0.6);
   }
   50% {
-    box-shadow: 0 0 40px 12px rgba(255, 213, 79, 0.9);
+    box-shadow: 0 0 36px 10px rgba(255, 224, 138, 0.85);
   }
 }
 
@@ -83,3 +126,49 @@ body {
 .animate-float {
   animation: float-bob 3s ease-in-out infinite;
 }
+
+/* 雲寶：耳朵與尾巴輕輕擺動 */
+@keyframes mascot-ear-sway {
+  0%,
+  100% {
+    transform: rotate(-2deg);
+  }
+  50% {
+    transform: rotate(3deg);
+  }
+}
+
+@keyframes mascot-tail-wag {
+  0%,
+  100% {
+    transform: rotate(-6deg);
+  }
+  50% {
+    transform: rotate(8deg);
+  }
+}
+
+.mascot-ear-l {
+  animation: mascot-ear-sway 3.4s ease-in-out infinite;
+}
+
+.mascot-ear-r {
+  animation: mascot-ear-sway 3.4s ease-in-out infinite reverse;
+}
+
+.mascot-tail {
+  animation: mascot-tail-wag 1.6s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mascot-ear-l,
+  .mascot-ear-r,
+  .mascot-tail,
+  .animate-float,
+  .animate-glow,
+  .animate-wiggle {
+    animation: none;
+  }
+}
+
+/* 發光動畫改成柔和的奶油黃 */

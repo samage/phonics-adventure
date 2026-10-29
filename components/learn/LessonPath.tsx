@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { motion, type PanInfo } from 'framer-motion';
 import { CURRICULUM } from '@/data/curriculum';
 import type { Unit, UnitId } from '@/types/curriculum';
@@ -16,7 +16,15 @@ function lessonsForUnit(unitId: UnitId) {
 export default function LessonPath() {
   const units = CURRICULUM.units;
   const { progress, hydrated, getUnitProgress } = useProgress();
-  const [activeIndex, setActiveIndex] = useState(0);
+  // 孩子手動切換過單元就用他選的；沒切換過就停在「目前課程」所在的單元
+  const [picked, setPicked] = useState<number | null>(null);
+  const currentIndex = useMemo(() => {
+    if (!hydrated || !progress.currentLessonId) return 0;
+    const lesson = CURRICULUM.lessons.find((l) => l.id === progress.currentLessonId);
+    const idx = lesson ? units.findIndex((u) => u.id === lesson.unitId) : -1;
+    return idx >= 0 ? idx : 0;
+  }, [hydrated, progress.currentLessonId, units]);
+  const activeIndex = picked ?? currentIndex;
 
   const activeUnit = units[activeIndex];
   const activeLessons = useMemo(
@@ -24,17 +32,9 @@ export default function LessonPath() {
     [activeUnit],
   );
 
-  useEffect(() => {
-    if (!hydrated || !progress.currentLessonId) return;
-    const lesson = CURRICULUM.lessons.find((l) => l.id === progress.currentLessonId);
-    if (!lesson) return;
-    const idx = units.findIndex((u) => u.id === lesson.unitId);
-    if (idx >= 0) setActiveIndex(idx);
-  }, [hydrated, progress.currentLessonId, units]);
-
   const goTo = useCallback(
     (index: number) => {
-      setActiveIndex(Math.max(0, Math.min(index, units.length - 1)));
+      setPicked(Math.max(0, Math.min(index, units.length - 1)));
     },
     [units.length],
   );
@@ -101,7 +101,7 @@ export default function LessonPath() {
           initial={{ opacity: 0, x: 24 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.2 }}
-          className="touch-pan-y rounded-2xl border-2 border-amber-100 bg-white/50 p-3"
+          className="touch-pan-y rounded-2xl border-2 border-white bg-white/60 p-3 shadow-md"
           style={{ borderColor: `${activeUnit.accent}55` }}
         >
           <div
