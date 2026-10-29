@@ -128,7 +128,7 @@ function PlacementRun({ onRetake }: { onRetake: () => void }) {
         </button>
       ) : (
         <div className="flex w-full flex-col items-center gap-3">
-          <p className="text-lg text-emerald-700">已記好了！所有課程都開放囉 ☁️</p>
+          <p className="text-lg text-sky-700">已記好了！所有課程都開放囉 ☁️</p>
           <div className="flex flex-wrap justify-center gap-3">
             <Link href="/review" className={BTN_PRIMARY}>
               今天複習

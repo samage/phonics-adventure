@@ -1,24 +1,13 @@
 import type { Curriculum } from '@/types/curriculum';
-import { getPlayableLessons } from '@/types/curriculum';
-import {
-  PHONICS_LESSONS,
-  UNITS,
-  ALL_SPELLINGS,
-  LEGACY_LESSON_ID_MAP,
-} from './phonicsCurriculum';
+import { PHONICS_LESSONS, UNITS, LEGACY_LESSON_ID_MAP } from './phonicsCurriculum';
 
 export const CURRICULUM: Curriculum = {
-  version: '7.0.0',
+  version: '8.0.0',
   units: UNITS,
   lessons: PHONICS_LESSONS,
 };
 
-export {
-  PHONICS_LESSONS,
-  UNITS,
-  ALL_SPELLINGS,
-  LEGACY_LESSON_ID_MAP,
-} from './phonicsCurriculum';
+export { PHONICS_LESSONS } from './phonicsCurriculum';
 
 const LESSON_ID_SET = new Set(PHONICS_LESSONS.map((l) => l.id));
 
@@ -41,19 +30,6 @@ export function migrateLessonIdFromLegacy(
   return LEGACY_LESSON_ID_MAP[id] ?? id;
 }
 
-/** @deprecated 改用 PHONICS_LESSONS */
-export const HOP_LESSONS = PHONICS_LESSONS;
-
-/** @deprecated */
-export const JUNYI_LESSONS = PHONICS_LESSONS;
-
-/** @deprecated */
-export const ALL_LETTERS: string[] = [];
-
 export function getAllLessons() {
   return CURRICULUM.lessons;
-}
-
-export function getPlayableLessonCount(): number {
-  return getPlayableLessons(CURRICULUM).length;
 }

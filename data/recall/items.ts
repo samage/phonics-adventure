@@ -10,7 +10,7 @@
  * - words：規則、好唸的例字（不含其他容易混淆的拼法），用於「選例字」題與提示。
  */
 
-export type RecallCategory = 'letters' | 'combos' | 'blends';
+type RecallCategory = 'letters' | 'combos' | 'blends';
 
 /** 分班測驗用的難度層級（由易到難） */
 export type RecallTier =

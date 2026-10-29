@@ -1,44 +1,15 @@
 import type { PhonicsBlock } from '@/types/phonics';
 import { getHopPattern } from '@/data/hopEnglishPatterns';
-import {
-  GRAPHEME_PHONEMES,
-  LETTER_PHONEMES,
-  LONG_VOWEL_PHONEMES,
-  getPhonemeEntry,
-} from '@/data/phonemeRegistry';
-import {
-  playSoundcityForBlock,
-  playSoundcityKey,
-} from '@/lib/phonemeAudio';
-import {
-  hopTtsPhonemeFallback,
-  resolveHopSoundcityKeys,
-} from '@/lib/hopPhonemeAudio';
-import { playIpaHopPhoneme } from '@/lib/ipaPhonemeAudio';
+import { getPhonemeEntry } from '@/data/phonemeRegistry';
+import { playClips, playPhonemeBlock, playPhonemeKey } from '@/lib/phonemeAudio';
+import { hopTtsPhonemeFallback } from '@/lib/hopPhonemeAudio';
+import { resolveHopClips } from '@/lib/phonemeClips';
+import { AUDIO_PACING } from '@/lib/audioPacing';
 import { cancelSpeech, speak } from '@/lib/speech';
 
-function isSingleLetter(char: string): boolean {
-  return /^[a-z]$/i.test(char);
-}
-
-export function resolveBlockAudioKey(block: PhonicsBlock): string {
-  const text = block.text.toLowerCase();
-
-  if (text.includes('_e') && text.length >= 3) {
-    const vowel = text[0];
-    const longKey = `long_${vowel}`;
-    if (LONG_VOWEL_PHONEMES[longKey]) return longKey;
-  }
-
-  if (GRAPHEME_PHONEMES[text]) return text;
-
-  if (isSingleLetter(text) && LETTER_PHONEMES[text]) return text;
-
-  if (block.type === 'blend' && text.length >= 2) {
-    return `blend:${text}`;
-  }
-
-  return text;
+/** 不發音的積木（Magic E 的 e、不發音的字母） */
+export function isSilentBlock(block: PhonicsBlock): boolean {
+  return block.type === 'silent_e' || block.phoneme.trim() === '';
 }
 
 function ttsFallbackForKey(key: string): string {
@@ -47,7 +18,10 @@ function ttsFallbackForKey(key: string): string {
   return key;
 }
 
-/** 播放單一音素：Sound City Reading → Web Speech */
+/**
+ * 播放單一音素（key：字母、字素、long_x、hop_xxx、blend:xx、clip id）。
+ * 預錄女聲優先；只有「沒有預錄檔」的音（ʒ）才退回裝置 TTS。
+ */
 export async function speakPhoneme(key: string): Promise<void> {
   cancelSpeech();
   const k = key.toLowerCase();
@@ -55,16 +29,9 @@ export async function speakPhoneme(key: string): Promise<void> {
   if (k.startsWith('hop_')) {
     const pattern = getHopPattern(k);
     if (pattern) {
-      if (await playIpaHopPhoneme(k)) return;
-
-      const scrKeys = resolveHopSoundcityKeys(k);
-      if (scrKeys.length > 0) {
-        for (let i = 0; i < scrKeys.length; i++) {
-          if (i > 0) {
-            await new Promise((r) => setTimeout(r, 400));
-          }
-          await playSoundcityKey(scrKeys[i]);
-        }
+      const clips = resolveHopClips(k);
+      if (clips.length > 0) {
+        await playClips(clips, { gapMs: AUDIO_PACING.hopClipGapMs });
         return;
       }
       await speak(hopTtsPhonemeFallback(k, pattern), { rate: 0.45, pitch: 1.0 });
@@ -72,35 +39,14 @@ export async function speakPhoneme(key: string): Promise<void> {
     }
   }
 
-  if (k.startsWith('blend:')) {
-    const letters = k.slice(6);
-    for (let i = 0; i < letters.length; i++) {
-      await speakPhoneme(letters[i]);
-      if (i < letters.length - 1) {
-        await new Promise((r) => setTimeout(r, 200));
-      }
-    }
-    return;
-  }
-
-  if (k === 'x') {
-    await speakPhoneme('k');
-    await new Promise((r) => setTimeout(r, 180));
-    await speakPhoneme('s');
-    return;
-  }
-
-  if (await playSoundcityKey(k)) return;
-
+  if (await playPhonemeKey(k)) return;
   await speak(ttsFallbackForKey(k), { rate: 0.45, pitch: 1.0 });
 }
 
+/** Sound-talk、拼字遊戲用：唸一個積木的音 */
 export async function speakBlockPhoneme(block: PhonicsBlock): Promise<void> {
-  if (block.type === 'silent_e') return;
+  if (isSilentBlock(block)) return;
   cancelSpeech();
-  if (await playSoundcityForBlock(block)) return;
-  const key = resolveBlockAudioKey(block);
-  return speakPhoneme(key);
+  if (await playPhonemeBlock(block)) return;
+  await speak(ttsFallbackForKey(block.text.toLowerCase()), { rate: 0.45, pitch: 1.0 });
 }
-
-export { speakPhoneme as speakLetterSound };

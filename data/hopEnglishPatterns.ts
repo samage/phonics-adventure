@@ -1,6 +1,6 @@
 import type { PhonicsType } from '@/types/phonics';
 
-export type HopPatternCategory =
+type HopPatternCategory =
   | 'voiced_consonant'
   | 'voiceless_consonant'
   | 'vowel';
@@ -141,7 +141,7 @@ export const HOP_ENGLISH_PATTERNS: HopEnglishPattern[] = [
  * Phase 1 新增、不在 Hop 原 40 組內的規則。
  * 另放一個清單，避免動到 HOP_ENGLISH_PATTERNS 的索引（舊進度的 L## 對照依賴索引）。
  */
-export const EXTRA_HOP_PATTERNS: HopEnglishPattern[] = [
+const EXTRA_HOP_PATTERNS: HopEnglishPattern[] = [
   pat(
     'hop_ck',
     'ck',

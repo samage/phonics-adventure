@@ -1,16 +1,15 @@
 """
-下載 Sound City Reading 音檔至 public/audio/soundcity/
+下載 Sound City Reading 的原始錄音至 audio-src/scr/
+（只是原始素材；app 實際播放的檔案由 scripts/build_audio.py 處理後輸出到 public/audio/phonemes/）
 執行：py -3 scripts/download_soundcity_audio.py
 """
 from __future__ import annotations
 
-import json
 import urllib.request
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-OUT_DIR = ROOT / "public" / "audio" / "soundcity"
-MANIFEST_PATH = ROOT / "data" / "soundcityPhonemeManifest.json"
+OUT_DIR = ROOT / "audio-src" / "scr"
 SCR_BASE = "https://www.soundcityreading.net/uploads/3/7/6/1/37611941"
 
 # localFile (without .mp3) -> SCR remote filename
@@ -51,10 +50,9 @@ EXPLICIT_FILES: dict[str, str] = {
     "th_voiced": "btalpha-5-th-hard.mp3",
     "ch": "btalpha-8-ch.mp3",
     "ng": "btalpha-9-ng.mp3",
+    # oy 與 oi、ow 與 ou 在 SCR 是同一個遠端檔，只下載一份（拼法對應在程式裡）
     "oi": "btalpha-11-oy.mp3",
-    "oy": "btalpha-11-oy.mp3",
     "ou": "btalpha-12-ow.mp3",
-    "ow": "btalpha-12-ow.mp3",
 }
 
 
@@ -65,19 +63,8 @@ def download(url: str, dest: Path) -> None:
     dest.write_bytes(data)
 
 
-def manifest_meta(local_name: str) -> dict:
-    if "_" in local_name and local_name.split("_", 1)[1] in (
-        "short", "long", "voiceless", "voiced",
-    ):
-        key, variant = local_name.split("_", 1)
-    else:
-        key, variant = local_name, "default"
-    return {"key": key, "variant": variant, "localFile": f"{local_name}.mp3"}
-
-
 def main() -> None:
     OUT_DIR.mkdir(parents=True, exist_ok=True)
-    manifest_out: list[dict] = []
     ok, skip, fail = 0, 0, 0
 
     for local_name, remote in EXPLICIT_FILES.items():
@@ -86,22 +73,16 @@ def main() -> None:
 
         if dest.exists() and dest.stat().st_size > 500:
             skip += 1
-            manifest_out.append({**manifest_meta(local_name), "sourceUrl": url})
             continue
 
         try:
             download(url, dest)
             print(f"  {local_name}.mp3 <- {remote}")
-            manifest_out.append({**manifest_meta(local_name), "sourceUrl": url})
             ok += 1
         except Exception as exc:
             print(f"  FAIL {local_name}: {exc}")
             fail += 1
 
-    MANIFEST_PATH.write_text(
-        json.dumps(manifest_out, indent=2, ensure_ascii=False),
-        encoding="utf-8",
-    )
     print(f"Done: {ok} downloaded, {skip} skipped, {fail} failed")
 
 

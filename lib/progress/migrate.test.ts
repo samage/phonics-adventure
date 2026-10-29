@@ -4,15 +4,19 @@ import {
   LEGACY_PROGRESS_STORAGE_KEY,
   LEGACY_PROGRESS_V4_KEY,
   LEGACY_PROGRESS_V6_KEY,
+  LEGACY_PROGRESS_V7_KEY,
+  LEGACY_PROGRESS_V8_KEY,
   PROGRESS_STORAGE_KEY,
 } from '@/types/progress';
 import { PHONICS_LESSONS } from '@/data/curriculum';
-import { isLessonUnlockedFor } from './ProgressStore';
+import { isLessonUnlockedFor } from './logic';
 import { createDefaultProgress } from '@/types/progress';
 
 function reader(store: Record<string, unknown>) {
   return (key: string) => (key in store ? JSON.stringify(store[key]) : null);
 }
+
+const TODAY = '2026-10-29';
 
 const V6 = {
   completedLessons: ['L01', 'L02', 'L03'],
@@ -23,7 +27,7 @@ const V6 = {
 
 describe('loadProgress：遷移', () => {
   it('沒有任何資料 → 預設進度', () => {
-    const r = loadProgress(() => null);
+    const r = loadProgress(() => null, TODAY);
     expect(r.source).toBe('none');
     expect(r.needsPersist).toBe(false);
     expect(r.progress.completedLessons).toEqual([]);
@@ -31,43 +35,126 @@ describe('loadProgress：遷移', () => {
     expect(r.progress.placement).toBeNull();
   });
 
-  it('v6 → v7：課次與單字統計原封不動，補上 review／placement', () => {
-    const r = loadProgress(reader({ [LEGACY_PROGRESS_V6_KEY]: V6 }));
+  it('v7 → v9：丟掉 wordStats，其他進度與既有複習紀錄不變', () => {
+    const existing = { box: 4, due: '2026-11-20', seen: 5, right: 5, wrong: 0 };
+    const r = loadProgress(
+      reader({
+        [LEGACY_PROGRESS_V7_KEY]: {
+          ...V6,
+          review: { s: existing },
+          placement: { takenAt: '2026-10-20T00:00:00.000Z', knownIds: ['s'], missedIds: [], startTier: 'core' },
+        },
+      }),
+      TODAY,
+    );
+    expect(r.source).toBe('v7');
+    expect(r.needsPersist).toBe(true);
+    expect('wordStats' in r.progress).toBe(false);
+    expect(r.progress.completedLessons).toEqual(['L01', 'L02', 'L03']);
+    expect(r.progress.review.s).toEqual(existing); // 已有紀錄不被覆蓋
+    expect(r.progress.placement?.knownIds).toEqual(['s']);
+  });
+
+  it('v6 → v9：課次不變，已完成的課教過的字母補上複習紀錄', () => {
+    const r = loadProgress(reader({ [LEGACY_PROGRESS_V6_KEY]: V6 }), TODAY);
     expect(r.source).toBe('v6');
     expect(r.needsPersist).toBe(true);
     expect(r.progress.completedLessons).toEqual(['L01', 'L02', 'L03']);
     expect(r.progress.currentLessonId).toBe('L03');
-    expect(r.progress.wordStats.cat).toEqual({ correct: 3, attempts: 3 });
-    expect(r.progress.review).toEqual({});
+    // L01–L03 教 s、a、t
+    expect(Object.keys(r.progress.review).sort()).toEqual(['a', 's', 't']);
     expect(r.progress.placement).toBeNull();
   });
 
-  it('v7 優先於 v6', () => {
+  it('補上的紀錄：盒子 2、尚未作答、到期日分散在 4 天內，不會全擠在同一天', () => {
+    const doneAll = PHONICS_LESSONS.map((l) => l.id);
+    const r = loadProgress(
+      reader({ [LEGACY_PROGRESS_V6_KEY]: { ...V6, completedLessons: doneAll } }),
+      TODAY,
+    );
+    const recs = Object.values(r.progress.review);
+    expect(recs.length).toBeGreaterThan(40);
+    expect(recs.every((x) => x.box === 2 && x.seen === 0)).toBe(true);
+    const dues = new Set(recs.map((x) => x.due));
+    expect(dues).toEqual(new Set([TODAY, '2026-10-30', '2026-10-31', '2026-11-01']));
+    const dueToday = recs.filter((x) => x.due === TODAY).length;
+    expect(dueToday).toBeLessThanOrEqual(Math.ceil(recs.length / 4));
+  });
+
+  it('v9 優先於 v8／v7，且不再補紀錄（沒有「降級」或重複補）', () => {
     const r = loadProgress(
       reader({
         [PROGRESS_STORAGE_KEY]: { ...V6, completedLessons: ['L01'], review: {}, placement: null },
+        [LEGACY_PROGRESS_V8_KEY]: { ...V6, completedLessons: ['L21'], review: {}, placement: null },
+        [LEGACY_PROGRESS_V7_KEY]: V6,
         [LEGACY_PROGRESS_V6_KEY]: V6,
       }),
+      TODAY,
     );
-    expect(r.source).toBe('v7');
+    expect(r.source).toBe('v9');
     expect(r.needsPersist).toBe(false);
     expect(r.progress.completedLessons).toEqual(['L01']);
+    expect(r.progress.review).toEqual({});
   });
 
-  it('v5 → v7：課次 ID 轉成現行 ID，且結果都是現行課程裡存在的 ID', () => {
+  it('v8 → v9：已完成的特殊字課、短句課補上複習紀錄；字母與既有紀錄完全不動', () => {
+    const existing = { box: 4, due: '2026-11-20', seen: 5, right: 5, wrong: 0 };
+    const v8 = {
+      ...V6,
+      completedLessons: ['L01', 'L20', 'L21'],
+      review: { s: existing, 'w:the': existing },
+      placement: null,
+    };
+    const r = loadProgress(reader({ [LEGACY_PROGRESS_V8_KEY]: v8 }), TODAY);
+    expect(r.source).toBe('v8');
+    expect(r.needsPersist).toBe(true);
+    expect(r.progress.completedLessons).toEqual(['L01', 'L20', 'L21']);
+    expect(r.progress.review.s).toEqual(existing);
+    expect(r.progress.review['w:the']).toEqual(existing);
+    expect(Object.keys(r.progress.review).sort()).toEqual(
+      ['s', 's:L20:0', 's:L20:1', 's:L20:2', 'w:said', 'w:the', 'w:was'].sort(),
+    );
+    expect(r.progress.review['w:said']).toMatchObject({ box: 2, seen: 0 });
+    // 沒有為字母補紀錄（L01 以外的字母課沒完成）
+    expect(r.progress.review.a).toBeUndefined();
+  });
+
+  it('v8 → v9：沒完成特殊字課／短句課就不補；v8 沒有字母補紀錄', () => {
+    const r = loadProgress(
+      reader({ [LEGACY_PROGRESS_V8_KEY]: { ...V6, completedLessons: ['L01', 'L02'], review: {} } }),
+      TODAY,
+    );
+    expect(r.source).toBe('v8');
+    expect(r.progress.review).toEqual({});
+  });
+
+  it('v6 → v9：已完成的特殊字課、短句課也一併補上', () => {
+    const r = loadProgress(
+      reader({ [LEGACY_PROGRESS_V6_KEY]: { ...V6, completedLessons: ['L21', 'L20'] } }),
+      TODAY,
+    );
+    expect(Object.keys(r.progress.review).sort()).toEqual(
+      ['s:L20:0', 's:L20:1', 's:L20:2', 'w:said', 'w:the', 'w:was'].sort(),
+    );
+  });
+
+  it('v5 → v9：課次 ID 轉成現行 ID，且結果都是現行課程裡存在的 ID', () => {
     const ids = PHONICS_LESSONS.map((l) => l.id);
     const r = loadProgress(
       reader({ [LEGACY_PROGRESS_STORAGE_KEY]: { ...V6, completedLessons: ['E01', 'E02', 'C01'] } }),
+      TODAY,
     );
     expect(r.source).toBe('v5');
     expect(r.progress.completedLessons.length).toBeGreaterThan(0);
     for (const id of r.progress.completedLessons) expect(ids).toContain(id);
+    expect(Object.keys(r.progress.review).length).toBeGreaterThan(0);
   });
 
-  it('v4 → v7：舊的 Hop 編號 L01–L41 強制對照，不會與現行編號混淆', () => {
+  it('v4 → v9：舊的 Hop 編號 L01–L41 強制對照，不會與現行編號混淆', () => {
     const ids = PHONICS_LESSONS.map((l) => l.id);
     const r = loadProgress(
       reader({ [LEGACY_PROGRESS_V4_KEY]: { ...V6, completedLessons: ['L01', 'L05'], currentLessonId: 'L05' } }),
+      TODAY,
     );
     expect(r.source).toBe('v4');
     for (const id of r.progress.completedLessons) expect(ids).toContain(id);
@@ -75,8 +162,10 @@ describe('loadProgress：遷移', () => {
   });
 
   it('壞掉的 JSON 會略過，往下一個版本找', () => {
-    const r = loadProgress((key) =>
-      key === PROGRESS_STORAGE_KEY ? '{壞掉' : key === LEGACY_PROGRESS_V6_KEY ? JSON.stringify(V6) : null,
+    const r = loadProgress(
+      (key) =>
+        key === PROGRESS_STORAGE_KEY ? '{壞掉' : key === LEGACY_PROGRESS_V6_KEY ? JSON.stringify(V6) : null,
+      TODAY,
     );
     expect(r.source).toBe('v6');
     expect(r.progress.completedLessons).toEqual(['L01', 'L02', 'L03']);
@@ -85,7 +174,7 @@ describe('loadProgress：遷移', () => {
   it('完全不是物件的內容 → 預設進度，不會丟例外', () => {
     expect(sanitizeProgress('abc').completedLessons).toEqual([]);
     expect(sanitizeProgress(null).review).toEqual({});
-    expect(sanitizeProgress({ completedLessons: 'x', wordStats: 5, review: 7 }).wordStats).toEqual({});
+    expect(sanitizeProgress({ completedLessons: 'x', wordStats: 5, review: 7 }).review).toEqual({});
   });
 
   it('review 中格式不對的項目會被丟掉，合法的保留', () => {

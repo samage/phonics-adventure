@@ -9,9 +9,8 @@
     "lint": "eslint",
     "test": "vitest run",
     "download:soundcity-audio": "py -3 scripts/download_soundcity_audio.py",
-    "download:scr-supplement-audio": "py -3 scripts/download_scr_supplement_audio.py",
-    "download:ipa-audio": "py -3 scripts/download_ipa_audio.py",
-    "download:audio": "py -3 scripts/download_soundcity_audio.py && py -3 scripts/download_scr_supplement_audio.py && py -3 scripts/download_ipa_audio.py"
+    "export:speech-texts": "vitest run -c scripts/vitest.export.config.mts",
+    "build:audio": "py -3 scripts/build_audio.py"
   },
   "dependencies": {
     "canvas-confetti": "^1.9.4",

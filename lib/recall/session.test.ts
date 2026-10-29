@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { RECALL_ITEMS } from '@/data/recall/items';
+import { TEXT_ITEMS } from '@/data/recall/textItems';
 import { seededRng } from './quiz';
-import { NEW_PER_SESSION, SESSION_SIZE, pickRecallSession, tierSummary } from './session';
+import { NEW_PER_SESSION, SESSION_SIZE, pickRecallSession } from './session';
 import type { ReviewMap } from '@/lib/review/scheduler';
 
 const TODAY = '2026-10-29';
@@ -9,7 +10,7 @@ const rec = (box: 1 | 2 | 3 | 4 | 5, due: string) => ({ box, due, seen: 1, right
 
 describe('pickRecallSession', () => {
   it('全新使用者：最多 5 個新項目', () => {
-    const picked = pickRecallSession({}, null, TODAY, seededRng(1));
+    const picked = pickRecallSession({}, RECALL_ITEMS, TODAY, seededRng(1));
     expect(picked.length).toBe(NEW_PER_SESSION);
     expect(new Set(picked.map((p) => p.id)).size).toBe(picked.length);
   });
@@ -19,7 +20,7 @@ describe('pickRecallSession', () => {
       [RECALL_ITEMS[10].id]: rec(1, TODAY),
       [RECALL_ITEMS[11].id]: rec(2, '2026-10-20'),
     };
-    const ids = pickRecallSession(review, null, TODAY, seededRng(2)).map((p) => p.id);
+    const ids = pickRecallSession(review, RECALL_ITEMS, TODAY, seededRng(2)).map((p) => p.id);
     expect(ids).toContain(RECALL_ITEMS[10].id);
     expect(ids).toContain(RECALL_ITEMS[11].id);
   });
@@ -28,24 +29,35 @@ describe('pickRecallSession', () => {
     const review: ReviewMap = Object.fromEntries(
       RECALL_ITEMS.map((it) => [it.id, rec(5, '2026-12-01')]),
     );
-    expect(pickRecallSession(review, null, TODAY, seededRng(3))).toEqual([]);
+    expect(pickRecallSession(review, RECALL_ITEMS, TODAY, seededRng(3))).toEqual([]);
   });
 
-  it('指定難度層時只出該層的項目，且不超過一輪的題數', () => {
-    const picked = pickRecallSession({}, 'digraphs', TODAY, seededRng(4));
+  it('只會從傳入的候選（已學過）項目裡挑，且不超過一輪的題數', () => {
+    const learned = RECALL_ITEMS.filter((it) => it.tier === 'digraphs');
+    const picked = pickRecallSession({}, learned, TODAY, seededRng(4));
+    expect(picked.length).toBeGreaterThan(0);
     expect(picked.every((p) => p.tier === 'digraphs')).toBe(true);
     expect(picked.length).toBeLessThanOrEqual(SESSION_SIZE);
   });
-});
 
-describe('tierSummary', () => {
-  it('統計總數、看過、學穩', () => {
-    const first = RECALL_ITEMS.filter((i) => i.tier === 'core');
-    const review: ReviewMap = {
-      [first[0].id]: rec(4, TODAY),
-      [first[1].id]: rec(1, TODAY),
-    };
-    const s = tierSummary(review, 'core');
-    expect(s).toEqual({ total: first.length, seen: 2, strong: 1 });
+  it('沒有候選項目就回傳空陣列', () => {
+    expect(pickRecallSession({}, [], TODAY, seededRng(5))).toEqual([]);
+  });
+
+  it('字母、特殊字、短句可以混在同一輪：到期的文字項目一樣優先', () => {
+    const candidates = [...RECALL_ITEMS.slice(0, 20), ...TEXT_ITEMS];
+    const review: ReviewMap = { 'w:the': rec(2, TODAY), 's:L20:1': rec(1, '2026-10-01') };
+    const picked = pickRecallSession(review, candidates, TODAY, seededRng(6));
+    const ids = picked.map((p) => p.id);
+    expect(ids).toContain('w:the');
+    expect(ids).toContain('s:L20:1');
+    expect(new Set(ids).size).toBe(ids.length);
+    expect(picked.length).toBeLessThanOrEqual(SESSION_SIZE);
+  });
+
+  it('只有文字候選時也能出一輪', () => {
+    const picked = pickRecallSession({}, TEXT_ITEMS, TODAY, seededRng(7));
+    expect(picked.length).toBeGreaterThan(0);
+    expect(picked.every((p) => 'kind' in p)).toBe(true);
   });
 });

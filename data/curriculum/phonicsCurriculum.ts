@@ -28,7 +28,7 @@ export const UNITS: Unit[] = [
     order: 1,
     title: '入門拼讀',
     description: 's a t p i n m d — 學幾個音就練幾個字',
-    accent: '#81C784',
+    accent: '#7EC8F2',
     shadow: '#388E3C',
   },
   {
@@ -36,7 +36,7 @@ export const UNITS: Unit[] = [
     order: 2,
     title: '讀字基礎',
     description: '補齊字母，讀更多短母音字',
-    accent: '#4FC3F7',
+    accent: '#F4A6C1',
     shadow: '#0288D1',
   },
   {
@@ -44,7 +44,7 @@ export const UNITS: Unit[] = [
     order: 3,
     title: '連音',
     description: 'st、bl、tr、str… 子音連在一起，每個音都要唸出來',
-    accent: '#80DEEA',
+    accent: '#A9B8F5',
     shadow: '#0097A7',
   },
   {
@@ -52,7 +52,7 @@ export const UNITS: Unit[] = [
     order: 4,
     title: '進階發音',
     description: 'sh、th、長母音、母音組 — 每個音只學一次',
-    accent: '#FFD54F',
+    accent: '#8FD3E8',
     shadow: '#FFA000',
   },
   {
@@ -60,7 +60,7 @@ export const UNITS: Unit[] = [
     order: 5,
     title: '替代拼法',
     description: '同一個音，多種拼法（bb、ph、kn…）',
-    accent: '#CE93D8',
+    accent: '#C6B0F2',
     shadow: '#8E24AA',
   },
 ];
@@ -81,7 +81,7 @@ const ADVANCED_REGULAR_WORDS: Record<string, string[]> = {
  * Phase 1 新增課次的固定 ID。ID 會存進孩子的進度，絕對不能因為插課而改變，
  * 所以只重排 order，不重編 id。
  */
-export const CK_LESSON_ID = 'CK1';
+const CK_LESSON_ID = 'CK1';
 
 function blendLesson(def: (typeof BLEND_LESSONS)[number], order: number): Lesson {
   const title = `連音（ ${def.blends.join(' / ')} ）`;
@@ -92,7 +92,6 @@ function blendLesson(def: (typeof BLEND_LESSONS)[number], order: number): Lesson
     words: def.words,
     wordOrder: 'sequential',
     ruleHint: def.hint,
-    lessonSteps: ['phoneme', 'grapheme', 'examples', 'word_lab', 'spelling'],
   };
   return {
     id: def.id,
@@ -119,7 +118,6 @@ function letterLesson(
     graphemes: [set.grapheme],
     words: set.practiceWords,
     wordOrder: 'sequential',
-    lessonSteps: ['phoneme', 'grapheme', 'examples', 'word_lab', 'spelling'],
   };
   return {
     id,
@@ -152,7 +150,6 @@ function hopLesson(
     words,
     wordOrder: 'sequential',
     ruleHint: options?.ruleHint ?? pattern.ruleDetail,
-    lessonSteps: ['phoneme', 'grapheme', 'examples', 'word_lab', 'spelling'],
   };
   return {
     id,
@@ -319,7 +316,7 @@ function withPhase1Lessons(base: Lesson[]): Lesson[] {
 export const PHONICS_LESSONS: Lesson[] = buildLessons();
 
 /** 依 Hop patternKey 查新課次 ID */
-export function lessonIdForHopKey(patternKey: string): string | null {
+function lessonIdForHopKey(patternKey: string): string | null {
   const lesson = PHONICS_LESSONS.find((l) =>
     l.activities.some(
       (a) =>
@@ -373,6 +370,3 @@ export const LEGACY_LESSON_ID_MAP: Record<string, string> = (() => {
 
   return map;
 })();
-
-export { HOP_ENGLISH_PATTERNS };
-export const ALL_SPELLINGS: string[] = HOP_ENGLISH_PATTERNS.flatMap((p) => p.spellings);

@@ -6,7 +6,7 @@ import type { QuizQuestion } from '@/lib/recall/quiz';
 import { playRecallSound } from '@/lib/recall/audio';
 import { speakWord } from '@/lib/speech';
 import Mascot from '@/components/mascot/Mascot';
-import RecallSoundButtons from './SoundButtons';
+import SoundPlayButtons from './SoundPlayButtons';
 
 /** 選項用小甜點／雲朵／星星當記號，避免用 A B C D 或紅綠叉叉 */
 const OPTION_ICONS = ['☁️', '⭐', '🧁', '🍮'];
@@ -67,8 +67,8 @@ export default function QuizPlayer({
     if (!showFeedback) {
       return 'border-white bg-white/95 hover:border-sky-300';
     }
-    if (id === question.answerId) return 'border-emerald-300 bg-emerald-50 ring-4 ring-emerald-100';
-    if (id === chosen) return 'border-amber-200 bg-amber-50 opacity-80';
+    if (id === question.answerId) return 'border-sky-300 bg-sky-50 ring-4 ring-sky-200';
+    if (id === chosen) return 'border-pink-200 bg-pink-50 opacity-80';
     return 'border-white bg-white/60 opacity-60';
   };
 
@@ -82,7 +82,7 @@ export default function QuizPlayer({
       <div className="flex w-full flex-col items-center gap-3 rounded-[2rem] border-4 border-white bg-white/90 px-6 py-6 shadow-lg">
         <p className="text-base text-sky-700">{PROMPT[question.mode]}</p>
         {question.mode === 'hear' ? (
-          <RecallSoundButtons audio={item.audio} fallbackKey={item.patternKey ?? item.display} />
+          <SoundPlayButtons audio={item.audio} fallbackKey={item.patternKey ?? item.display} />
         ) : (
           <p className="text-8xl font-bold leading-none text-sky-900">{item.display}</p>
         )}

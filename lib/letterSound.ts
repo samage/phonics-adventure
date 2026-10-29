@@ -1,24 +1,10 @@
 import type { PhonicsBlock } from '@/types/phonics';
 import { getLetterPhonics } from '@/data/letterPhonics';
-import { graphemeToBlock, getGraphemePhonics } from '@/data/graphemePhonics';
-import {
-  speakPhoneme,
-  speakLetterSound,
-  speakBlockPhoneme,
-  resolveBlockAudioKey,
-} from '@/lib/phonicsAudio';
+import { speakPhoneme } from '@/lib/phonicsAudio';
 
-export {
-  speakPhoneme,
-  speakLetterSound,
-  speakBlockPhoneme,
-  resolveBlockAudioKey,
-} from '@/lib/phonicsAudio';
+export { isSilentBlock, speakBlockPhoneme } from '@/lib/phonicsAudio';
 
-export function isSingleLetter(char: string): boolean {
-  return /^[a-z]$/i.test(char);
-}
-
+/** 單一字母 → 發音積木（沒有收錄時當成一般子音） */
 export function letterToBlock(letter: string): PhonicsBlock {
   const key = letter.toLowerCase();
   const meta = getLetterPhonics(key);
@@ -38,14 +24,7 @@ export function letterToBlock(letter: string): PhonicsBlock {
   };
 }
 
-export function keyToBlock(key: string): PhonicsBlock {
-  if (getGraphemePhonics(key)) return graphemeToBlock(key);
-  return letterToBlock(key);
-}
-
-export { getLetterPhonics } from '@/data/letterPhonics';
-export { getGraphemePhonics, graphemeToBlock } from '@/data/graphemePhonics';
-
+/** 唸出一個字母／字母組合的「音」（預錄音素，不是字母名稱） */
 export async function speakGrapheme(key: string): Promise<void> {
   return speakPhoneme(key);
 }

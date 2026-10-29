@@ -3,17 +3,13 @@ import {
   createDefaultProgress,
   type UserProgress,
 } from '@/types/progress';
-import type { UnitId } from '@/types/curriculum';
 import type { ReviewOutcome } from '@/lib/review/scheduler';
 import type { PlacementResult } from '@/lib/placement/placement';
 import {
   applyCompleteLesson,
-  applyGraphemeOutcome,
+  applyReviewOutcome,
   applyPlacement,
-  applyRecordWordAttempt,
-  createProgressHelpers,
-  type ProgressStore,
-} from './ProgressStore';
+} from './logic';
 import { loadProgress } from './migrate';
 
 function loadFromStorage(): UserProgress {
@@ -42,7 +38,7 @@ let memoryCache: UserProgress | null = null;
 const listeners = new Set<() => void>();
 const SERVER_SNAPSHOT: UserProgress = createDefaultProgress();
 
-export class LocalProgressStore implements ProgressStore {
+export class LocalProgressStore {
   private get progress(): UserProgress {
     if (!memoryCache) memoryCache = loadFromStorage();
     return memoryCache;
@@ -65,67 +61,25 @@ export class LocalProgressStore implements ProgressStore {
 
   getServerSnapshot = (): UserProgress => SERVER_SNAPSHOT;
 
-  getProgress(): UserProgress {
-    const p = this.progress;
-    return {
-      ...p,
-      completedLessons: [...p.completedLessons],
-      wordStats: { ...p.wordStats },
-      review: { ...p.review },
-    };
-  }
-
-  saveProgress(progress: UserProgress): void {
-    this.progress = progress;
-  }
-
-  completeLesson(lessonId: string): UserProgress {
+  completeLesson(lessonId: string): void {
     this.progress = applyCompleteLesson(this.progress, lessonId);
-    return this.getProgress();
   }
 
-  setCurrentLesson(lessonId: string | null): UserProgress {
+  setCurrentLesson(lessonId: string | null): void {
     this.progress = {
       ...this.progress,
       currentLessonId: lessonId,
       lastPlayedAt: new Date().toISOString(),
     };
-    return this.getProgress();
   }
 
-  recordWordAttempt(word: string, correct: boolean): UserProgress {
-    this.progress = applyRecordWordAttempt(this.progress, word, correct);
-    return this.getProgress();
+  /** 對某個複習項目（字母、特殊字、短句）的一次作答，不論來自哪個活動，都寫進同一份複習表 */
+  recordOutcome(itemId: string, outcome: ReviewOutcome): void {
+    this.progress = applyReviewOutcome(this.progress, itemId, outcome);
   }
 
-  recordGraphemeOutcome(itemId: string, outcome: ReviewOutcome): UserProgress {
-    this.progress = applyGraphemeOutcome(this.progress, itemId, outcome);
-    return this.getProgress();
-  }
-
-  applyPlacementResult(result: PlacementResult): UserProgress {
+  applyPlacementResult(result: PlacementResult): void {
     this.progress = applyPlacement(this.progress, result);
-    return this.getProgress();
-  }
-
-  isLessonCompleted(lessonId: string): boolean {
-    return createProgressHelpers(() => this.progress).isLessonCompleted(lessonId);
-  }
-
-  isLessonUnlocked(lessonId: string): boolean {
-    return createProgressHelpers(() => this.progress).isLessonUnlocked(lessonId);
-  }
-
-  getUnitProgress(unitId: UnitId): { completed: number; total: number } {
-    return createProgressHelpers(() => this.progress).getUnitProgress(unitId);
-  }
-
-  getOverallProgress(): { completed: number; total: number } {
-    return createProgressHelpers(() => this.progress).getOverallProgress();
-  }
-
-  resetProgress(): void {
-    this.progress = createDefaultProgress();
   }
 }
 
@@ -134,43 +88,4 @@ let storeInstance: LocalProgressStore | null = null;
 export function getProgressStore(): LocalProgressStore {
   if (!storeInstance) storeInstance = new LocalProgressStore();
   return storeInstance;
-}
-
-export class ApiProgressStore implements ProgressStore {
-  getProgress(): UserProgress {
-    throw new Error('ApiProgressStore not implemented');
-  }
-  saveProgress(): void {
-    throw new Error('ApiProgressStore not implemented');
-  }
-  completeLesson(): UserProgress {
-    throw new Error('ApiProgressStore not implemented');
-  }
-  setCurrentLesson(): UserProgress {
-    throw new Error('ApiProgressStore not implemented');
-  }
-  recordWordAttempt(): UserProgress {
-    throw new Error('ApiProgressStore not implemented');
-  }
-  recordGraphemeOutcome(): UserProgress {
-    throw new Error('ApiProgressStore not implemented');
-  }
-  applyPlacementResult(): UserProgress {
-    throw new Error('ApiProgressStore not implemented');
-  }
-  isLessonCompleted(): boolean {
-    throw new Error('ApiProgressStore not implemented');
-  }
-  isLessonUnlocked(): boolean {
-    throw new Error('ApiProgressStore not implemented');
-  }
-  getUnitProgress(): { completed: number; total: number } {
-    throw new Error('ApiProgressStore not implemented');
-  }
-  getOverallProgress(): { completed: number; total: number } {
-    throw new Error('ApiProgressStore not implemented');
-  }
-  resetProgress(): void {
-    throw new Error('ApiProgressStore not implemented');
-  }
 }

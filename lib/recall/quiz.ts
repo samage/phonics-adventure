@@ -21,7 +21,7 @@ import {
 export type Rng = () => number;
 export type QuizMode = 'sound' | 'word' | 'hear';
 
-export interface QuizOption {
+interface QuizOption {
   /** 該選項來源的項目 id（在同一題中唯一） */
   id: string;
   /** 顯示文字：word 模式為例字、hear 模式為字形；sound 模式沒有文字 */

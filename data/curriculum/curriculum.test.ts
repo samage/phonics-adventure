@@ -4,7 +4,7 @@ import { BLEND_LESSONS } from '@/data/blends';
 import { parseWordToBlocks } from '@/utils/phonicsEngine';
 import { getGraphemePhonics } from '@/data/graphemePhonics';
 import { RECALL_ITEMS } from '@/data/recall/items';
-import { resolveHopSoundcityKeys } from '@/lib/hopPhonemeAudio';
+import { resolveHopClips } from '@/lib/phonemeClips';
 
 describe('課程結構', () => {
   it('課次 id 不重複', () => {
@@ -91,7 +91,7 @@ describe('進階單元一開始用規則字', () => {
     expect(ck.order).toBe(ch.order + 1);
     expect(wordsOf('CK1').every((w) => w.endsWith('ck'))).toBe(true);
     expect(getGraphemePhonics('hop_ck')).not.toBeNull();
-    expect(resolveHopSoundcityKeys('hop_ck')).toEqual(['k']);
+    expect(resolveHopClips('hop_ck')).toEqual(['k']);
   });
 });
 

@@ -175,6 +175,20 @@ export function parseWordToBlocks(word: string): PhonicsBlock[] {
       continue;
     }
 
+    // qu 一定一起出現，唸 /kw/（queen、quit、quiz；不能拆成 q + ue / ui 母音團隊）
+    if (two === 'qu') {
+      blocks.push(makeBlock('qu', 'consonant', 'Basic Consonant', 'kw'));
+      i += 2;
+      continue;
+    }
+
+    // 字尾 -ngue（tongue）：ue 不發音
+    if (two === 'ue' && i === clean.length - 2 && clean.slice(i - 2, i) === 'ng') {
+      blocks.push(makeBlock('ue', 'silent_letter', 'Silent Letters', ''));
+      i += 2;
+      continue;
+    }
+
     // 雙字母 digraph
     if (two.length === 2 && DIGRAPHS[two]) {
       blocks.push(makeBlock(two, 'digraph', 'Digraphs', DIGRAPHS[two]));
