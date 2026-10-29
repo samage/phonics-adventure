@@ -1,4 +1,5 @@
 import type { PhonicsBlock } from '@/types/phonics';
+import { CURATED_BLEND_WORDS } from '@/data/curatedBlendWords';
 
 /**
  * 精選教學單字白名單。
@@ -559,6 +560,8 @@ export const CURATED_WORDS: Record<string, PhonicsBlock[]> = {
     { text: 'ey', type: 'long_vowel', soundRule: 'Vowel Teams', phoneme: 'iː' },
   ],
 };
+
+Object.assign(CURATED_WORDS, CURATED_BLEND_WORDS);
 
 /** @deprecated 課程單字改由 data/curriculum 驅動；保留供向後相容 */
 export const ALCHEMIST_WORDS: string[] = [

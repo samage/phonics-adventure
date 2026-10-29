@@ -34,7 +34,17 @@ export default function SoundButtons({
   splitDigraphIndices = null,
 }: SoundButtonsProps) {
   const letters = word.split('');
+  // 每個積木對應到單字裡的哪幾個字母（靜音 e 不佔位置）
+  const slices: string[] = [];
   let letterOffset = 0;
+  for (const b of blocks) {
+    if (b.type === 'silent_e') {
+      slices.push('');
+      continue;
+    }
+    slices.push(letters.slice(letterOffset, letterOffset + b.text.length).join(''));
+    letterOffset += b.text.length;
+  }
 
   return (
     <div className="flex flex-col items-center gap-2">
@@ -56,9 +66,7 @@ export default function SoundButtons({
             );
           }
 
-          const span = block.text.length;
-          const slice = letters.slice(letterOffset, letterOffset + span).join('');
-          letterOffset += span;
+          const slice = slices[blockIndex];
           const active = activeIndex === blockIndex;
           const multi = isMultiLetterBlock(block);
           const split =

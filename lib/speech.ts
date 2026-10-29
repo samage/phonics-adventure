@@ -38,8 +38,9 @@ function stopActiveAudio(): void {
 
 /**
  * 播放預錄音檔。回傳 true 代表成功播放；false 代表檔案不存在或播放失敗。
+ * rate < 1 為慢速播放（保持音高）。
  */
-export function playAudioFile(src: string): Promise<boolean> {
+export function playAudioFile(src: string, rate = 1): Promise<boolean> {
   return new Promise((resolve) => {
     if (typeof window === 'undefined') {
       resolve(false);
@@ -52,6 +53,11 @@ export function playAudioFile(src: string): Promise<boolean> {
     }
 
     const audio = new Audio(src);
+    if (rate !== 1) {
+      // 🐢 慢速：降低播放速度但保持音高
+      audio.playbackRate = rate;
+      audio.preservesPitch = true;
+    }
     activeAudio = audio;
 
     const finish = (ok: boolean) => {

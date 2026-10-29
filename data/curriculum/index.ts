@@ -8,7 +8,7 @@ import {
 } from './phonicsCurriculum';
 
 export const CURRICULUM: Curriculum = {
-  version: '6.0.0',
+  version: '7.0.0',
   units: UNITS,
   lessons: PHONICS_LESSONS,
 };

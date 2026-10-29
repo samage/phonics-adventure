@@ -137,8 +137,26 @@ export const HOP_ENGLISH_PATTERNS: HopEnglishPattern[] = [
   ),
 ];
 
+/**
+ * Phase 1 新增、不在 Hop 原 40 組內的規則。
+ * 另放一個清單，避免動到 HOP_ENGLISH_PATTERNS 的索引（舊進度的 L## 對照依賴索引）。
+ */
+export const EXTRA_HOP_PATTERNS: HopEnglishPattern[] = [
+  pat(
+    'hop_ck',
+    'ck',
+    '34',
+    'digraph',
+    'Voiceless Consonant',
+    'voiceless_consonant',
+    ['duck', 'sock', 'back', 'pick', 'kick'],
+    'ck 發 /k/，和 c、k 同一個音',
+    'ck 兩個字母合起來只發一個 /k/ 的音。\n\n規則：ck 只出現在「短母音」後面，通常在字尾：duck、sock、back、pick。',
+  ),
+];
+
 export const HOP_PATTERN_MAP: Record<string, HopEnglishPattern> = Object.fromEntries(
-  HOP_ENGLISH_PATTERNS.map((p) => [p.key, p]),
+  [...HOP_ENGLISH_PATTERNS, ...EXTRA_HOP_PATTERNS].map((p) => [p.key, p]),
 );
 
 export function getHopPattern(key: string): HopEnglishPattern | null {

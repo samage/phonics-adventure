@@ -183,7 +183,7 @@ export function soundcityAudioPath(fileName: string): string {
 }
 
 export function resolveSoundcityKey(key: string): string | null {
-  const k = key.toLowerCase();
+  const k = key.toLowerCase() === 'ck' ? 'k' : key.toLowerCase();
   if (hasScrSupplementKey(k)) return k;
   if (SOUNDCITY_BY_NAME.has(k)) return k;
   if (k.startsWith('long_')) {

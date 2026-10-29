@@ -8,7 +8,7 @@ interface BlendIntroLessonProps {
   wordOrder?: WordOrderMode;
   lessonId: string;
   onComplete: () => void;
-  onWordComplete?: (word: string) => void;
+  onWordComplete?: (word: string, correct: boolean) => void;
 }
 
 export default function BlendIntroLesson({

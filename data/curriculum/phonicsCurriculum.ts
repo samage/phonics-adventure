@@ -20,6 +20,7 @@ import {
   practiceWordsForPattern,
 } from '@/data/hopEnglishPatterns';
 import { TRICKY_WORDS } from '@/data/trickyWords';
+import { BLEND_LESSONS } from '@/data/blends';
 
 export const UNITS: Unit[] = [
   {
@@ -39,8 +40,16 @@ export const UNITS: Unit[] = [
     shadow: '#0288D1',
   },
   {
-    id: 'advanced',
+    id: 'blends',
     order: 3,
+    title: '連音',
+    description: 'st、bl、tr、str… 子音連在一起，每個音都要唸出來',
+    accent: '#80DEEA',
+    shadow: '#0097A7',
+  },
+  {
+    id: 'advanced',
+    order: 4,
     title: '進階發音',
     description: 'sh、th、長母音、母音組 — 每個音只學一次',
     accent: '#FFD54F',
@@ -48,7 +57,7 @@ export const UNITS: Unit[] = [
   },
   {
     id: 'alt_spellings',
-    order: 4,
+    order: 5,
     title: '替代拼法',
     description: '同一個音，多種拼法（bb、ph、kn…）',
     accent: '#CE93D8',
@@ -56,7 +65,47 @@ export const UNITS: Unit[] = [
   },
 ];
 
-const TH_COMBINED_WORDS = ['thin', 'math', 'then', 'father'];
+const TH_COMBINED_WORDS = ['thin', 'math', 'then', 'that'];
+
+/**
+ * 進階單元開頭改用「規則、可拼」的例字（原本的 machine、station、watch、tongue 太不規則）。
+ * 不規則的例字保留在 Hop 規則說明裡，之後的課再遇到。
+ */
+const ADVANCED_REGULAR_WORDS: Record<string, string[]> = {
+  hop_sh_ch_ti: ['ship', 'shop', 'fish', 'shed'],
+  hop_ch_tch_ture: ['chip', 'chop', 'much', 'rich'],
+  hop_ng_n_ngue: ['ring', 'sing', 'king', 'long'],
+};
+
+/**
+ * Phase 1 新增課次的固定 ID。ID 會存進孩子的進度，絕對不能因為插課而改變，
+ * 所以只重排 order，不重編 id。
+ */
+export const CK_LESSON_ID = 'CK1';
+
+function blendLesson(def: (typeof BLEND_LESSONS)[number], order: number): Lesson {
+  const title = `連音（ ${def.blends.join(' / ')} ）`;
+  const content: GraphemeContent = {
+    kind: 'grapheme',
+    patternKey: def.key,
+    graphemes: def.blends,
+    words: def.words,
+    wordOrder: 'sequential',
+    ruleHint: def.hint,
+    lessonSteps: ['phoneme', 'grapheme', 'examples', 'word_lab', 'spelling'],
+  };
+  return {
+    id: def.id,
+    order,
+    unitId: 'blends',
+    title,
+    subtitle: def.blends.join(' / '),
+    graphemes: def.blends,
+    words: def.words,
+    activities: [{ id: `${def.id}-act`, type: 'grapheme', title, content }],
+    implemented: true,
+  };
+}
 
 function letterLesson(
   id: string,
@@ -214,7 +263,11 @@ function buildLessons(): Lesson[] {
         }),
       );
     } else {
-      lessons.push(hopLesson(padId(order), order, 'advanced', key));
+      lessons.push(
+        hopLesson(padId(order), order, 'advanced', key, {
+          words: ADVANCED_REGULAR_WORDS[key],
+        }),
+      );
     }
     order += 1;
   }
@@ -236,7 +289,31 @@ function buildLessons(): Lesson[] {
     ),
   );
 
-  return lessons;
+  return withPhase1Lessons(lessons);
+}
+
+/** 插入連音單元與 -ck 課，並依新順序重排 order（id 不變） */
+function withPhase1Lessons(base: Lesson[]): Lesson[] {
+  const out: Lesson[] = [];
+  let blendsInserted = false;
+  for (const lesson of base) {
+    if (lesson.unitId === 'advanced' && !blendsInserted) {
+      out.push(...BLEND_LESSONS.map((def) => blendLesson(def, 0)));
+      blendsInserted = true;
+    }
+    out.push(lesson);
+    if (
+      lesson.activities[0]?.content.kind === 'grapheme' &&
+      lesson.activities[0].content.patternKey === 'hop_ch_tch_ture'
+    ) {
+      out.push(
+        hopLesson(CK_LESSON_ID, 0, 'advanced', 'hop_ck', {
+          words: ['duck', 'sock', 'back', 'pick', 'kick'],
+        }),
+      );
+    }
+  }
+  return out.map((l, i) => ({ ...l, order: i + 1 }));
 }
 
 export const PHONICS_LESSONS: Lesson[] = buildLessons();

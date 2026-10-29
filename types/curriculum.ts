@@ -1,6 +1,7 @@
 export type UnitId =
   | 'start'
   | 'cvc'
+  | 'blends'
   | 'advanced'
   | 'alt_spellings'
   /** @deprecated 舊版相容 */
@@ -124,7 +125,7 @@ export interface Unit {
 }
 
 export interface Curriculum {
-  version: '2.0.0' | '3.0.0' | '5.0.0' | '6.0.0';
+  version: '2.0.0' | '3.0.0' | '5.0.0' | '6.0.0' | '7.0.0';
   units: Unit[];
   lessons: Lesson[];
 }

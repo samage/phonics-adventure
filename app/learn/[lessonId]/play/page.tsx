@@ -22,8 +22,15 @@ export default function LessonPlayPage() {
   const rawId = params.lessonId;
   const lessonId = resolveLessonId(rawId);
   const lesson = findLesson(CURRICULUM, lessonId);
-  const { hydrated, isLessonUnlocked, completeLesson, recordWordAttempt, setCurrentLesson } =
-    useProgress();
+  const {
+    hydrated,
+    progress,
+    isLessonUnlocked,
+    completeLesson,
+    recordWordAttempt,
+    recordGraphemeOutcome,
+    setCurrentLesson,
+  } = useProgress();
 
   useEffect(() => {
     if (lesson) setCurrentLesson(lesson.id);
@@ -34,7 +41,7 @@ export default function LessonPlayPage() {
   if (!hydrated) {
     return (
       <main className="flex flex-1 flex-col items-center justify-center gap-6 p-6">
-        <p className="text-xl text-amber-700">載入中…</p>
+        <p className="text-xl text-sky-700">載入中…</p>
       </main>
     );
   }
@@ -83,7 +90,7 @@ export default function LessonPlayPage() {
           wordOrder={(activity.content as BlendIntroContent).wordOrder}
           lessonId={lessonId}
           onComplete={handleComplete}
-          onWordComplete={(w) => recordWordAttempt(w, true)}
+          onWordComplete={recordWordAttempt}
         />
       )}
 
@@ -95,8 +102,10 @@ export default function LessonPlayPage() {
           wordOrder={(activity.content as GraphemeContent).wordOrder}
           ruleHint={(activity.content as GraphemeContent).ruleHint}
           lessonId={lessonId}
+          wordStats={progress.wordStats}
           onComplete={handleComplete}
-          onWordComplete={(w) => recordWordAttempt(w, true)}
+          onWordComplete={recordWordAttempt}
+          onSpellingMistake={(itemId) => recordGraphemeOutcome(itemId, 'wrong')}
         />
       )}
 

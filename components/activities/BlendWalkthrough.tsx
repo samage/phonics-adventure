@@ -15,7 +15,7 @@ interface BlendWalkthroughProps {
   wordOrder?: WordOrderMode;
   lessonId: string;
   onComplete: () => void;
-  onWordComplete?: (word: string) => void;
+  onWordComplete?: (word: string, correct: boolean) => void;
 }
 
 export default function BlendWalkthrough({
@@ -33,13 +33,13 @@ export default function BlendWalkthrough({
   const currentWord = demos[demoIndex] ?? '';
 
   const handleDemoNext = useCallback(() => {
-    onWordComplete?.(currentWord);
+    // 示範不算作答，成績只來自後面的練習
     if (demoIndex < demos.length - 1) {
       setDemoIndex((i) => i + 1);
     } else {
       setPhase('practice');
     }
-  }, [currentWord, demoIndex, demos.length, onWordComplete]);
+  }, [demoIndex, demos.length]);
 
   const handlePracticeComplete = () => {
     fireConfetti();

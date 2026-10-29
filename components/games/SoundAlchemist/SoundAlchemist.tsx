@@ -10,6 +10,8 @@ import { speakBlock, speakWord, cancelSpeech } from '@/lib/speech';
 import { playBlendDemo, playBlendPartial } from '@/lib/blendDemoAudio';
 import { fireConfetti } from '@/components/ConfettiBurst';
 import PhonicsBlockCard from '@/components/PhonicsBlockCard';
+import MascotSays from '@/components/mascot/MascotSays';
+import { pickSpellingDistractors, recallItemIdForSlot } from '@/lib/spelling/distractors';
 
 interface BlockItem {
   id: string;
@@ -26,7 +28,10 @@ export interface SoundAlchemistProps {
   practiceMode?: PracticeMode;
   lessonId?: string;
   stageId?: string;
-  onWordComplete?: (word: string) => void;
+  /** correct = 這個字沒有任何拼錯（第一次就全對） */
+  onWordComplete?: (word: string, correct: boolean) => void;
+  /** 拼字模式：點錯積木（含干擾積木）時，回報該格對應的「看字說音」項目 id */
+  onSpellingMistake?: (itemId: string) => void;
   onLessonComplete?: () => void;
   requireAllWords?: boolean;
 }
@@ -81,6 +86,7 @@ export default function SoundAlchemist({
   lessonId,
   stageId,
   onWordComplete,
+  onSpellingMistake,
   onLessonComplete,
   requireAllWords = true,
 }: SoundAlchemistProps) {
@@ -93,6 +99,9 @@ export default function SoundAlchemist({
   const [items, setItems] = useState<BlockItem[]>(() =>
     buildItems(initialWord),
   );
+  /** 拼字模式的干擾積木（顏色與被模仿的積木相同） */
+  const [extras, setExtras] = useState<BlockItem[]>([]);
+  const [oopsCount, setOopsCount] = useState(0);
   const [filledSlots, setFilledSlots] = useState<BlockItem[]>([]);
   const [usedIds, setUsedIds] = useState<Set<string>>(() => new Set());
   const [poolOrder, setPoolOrder] = useState<string[]>([]);
@@ -107,6 +116,8 @@ export default function SoundAlchemist({
   const filledRef = useRef(filledSlots);
   const usedIdsRef = useRef(usedIds);
   const wordRef = useRef(word);
+  const mistakesRef = useRef(0);
+  const reportedSlotsRef = useRef<Set<number>>(new Set());
 
   useEffect(() => {
     itemsRef.current = items;
@@ -124,18 +135,18 @@ export default function SoundAlchemist({
   const placedCount = filledSlots.length;
 
   const poolItems = useMemo(() => {
-    const remaining = items.filter((i) => !usedIds.has(i.id));
+    const remaining = [...items, ...extras].filter((i) => !usedIds.has(i.id));
     return poolOrder
       .map((id) => remaining.find((i) => i.id === id))
       .filter((i): i is BlockItem => Boolean(i));
-  }, [items, usedIds, poolOrder]);
+  }, [items, extras, usedIds, poolOrder]);
 
   const completeWord = useCallback(
     (finalFilled: BlockItem[]) => {
       setWon(true);
       fireConfetti();
-      onWordComplete?.(wordRef.current);
-      const placedBlocks = finalFilled.map((i) => i.block);
+      onWordComplete?.(wordRef.current, mistakesRef.current === 0);
+      void finalFilled;
       if (isSpelling) {
         void speakWord(wordRef.current);
       } else {
@@ -155,6 +166,16 @@ export default function SoundAlchemist({
 
       if (!blocksMatch(item.block, expected.block)) {
         setRejectingId(item.id);
+        mistakesRef.current += 1;
+        setOopsCount(mistakesRef.current);
+        if (isSpelling && !reportedSlotsRef.current.has(slotIndex)) {
+          reportedSlotsRef.current.add(slotIndex);
+          const id = recallItemIdForSlot(
+            itemsRef.current.map((i) => i.block),
+            slotIndex,
+          );
+          if (id) onSpellingMistake?.(id);
+        }
         void speakBlock(item.block);
         window.setTimeout(() => setRejectingId(null), 450);
         return;
@@ -175,7 +196,7 @@ export default function SoundAlchemist({
         void playBlendPartial(wordRef.current, newFilled.length);
       }
     },
-    [isSpelling, completeWord],
+    [isSpelling, completeWord, onSpellingMistake],
   );
 
   const loadWord = useCallback(
@@ -183,12 +204,23 @@ export default function SoundAlchemist({
       cancelSpeech();
       const nextItems = buildItems(nextWord);
       const emptyUsed = new Set<string>();
+      const nextExtras: BlockItem[] = isSpelling
+        ? pickSpellingDistractors(nextItems.map((i) => i.block)).map((block, i) => ({
+            id: `${nextWord}-extra${i}-${block.text}`,
+            order: -1,
+            block,
+          }))
+        : [];
 
       setWord(nextWord);
       setItems(nextItems);
       setFilledSlots([]);
       setUsedIds(emptyUsed);
-      setPoolOrder(shuffle(nextItems.map((i) => i.id)));
+      setExtras(nextExtras);
+      setPoolOrder(shuffle([...nextItems, ...nextExtras].map((i) => i.id)));
+      mistakesRef.current = 0;
+      reportedSlotsRef.current = new Set();
+      setOopsCount(0);
       setWon(false);
       setRejectingId(null);
 
@@ -201,7 +233,7 @@ export default function SoundAlchemist({
         window.setTimeout(() => speakWord(nextWord), 400);
       }
     },
-    [practiceMode],
+    [practiceMode, isSpelling],
   );
 
   const startNextWord = useCallback(() => {
@@ -310,8 +342,13 @@ export default function SoundAlchemist({
             🔊 聽聽看
           </button>
           <p className="text-sm text-amber-600/80">
-            共 {items.length} 塊拼法，請聽整字後依規則組合
+            要放 {items.length} 塊，另外還有 {extras.length} 塊是長得很像的混淆積木
           </p>
+          {oopsCount > 0 && (
+            <MascotSays mood="cheer" size={72} className="max-w-md">
+              差一點點！再聽一次「🔊 聽聽看」，換一塊試試～
+            </MascotSays>
+          )}
         </div>
       )}
 
@@ -400,11 +437,13 @@ export default function SoundAlchemist({
           >
             {word}
           </button>
-          <p className="text-2xl text-green-700">太厲害了，拼出來了！</p>
+          <MascotSays mood={oopsCount === 0 ? 'wow' : 'happy'} size={96} className="max-w-md">
+            {oopsCount === 0 ? '太厲害了，一次就拼對！' : '拼出來了！下次會更順喔～'}
+          </MascotSays>
           <button
             type="button"
             onClick={startNextWord}
-            className="rounded-full bg-green-500 px-8 py-3 text-2xl text-white shadow-[0_6px_0_0_#2e7d32] transition-transform active:translate-y-1 active:shadow-[0_2px_0_0_#2e7d32]"
+            className="rounded-full bg-sky-400 px-8 py-3 text-2xl text-white shadow-[0_6px_0_0_#2f8fd0] transition-transform active:translate-y-1 active:shadow-[0_2px_0_0_#2f8fd0]"
           >
             {isLastWord ? '完成關卡 →' : '下一個單字 →'}
           </button>
@@ -458,7 +497,7 @@ export default function SoundAlchemist({
           </div>
           <p className="text-lg text-amber-700/70">
             {isSpelling
-              ? '點一下積木放進格子，或拖進煉金爐；相同拼法可任意選擇'
+              ? '點一下積木放進格子，或拖進煉金爐；小心，有些是多出來的混淆積木喔'
               : '點一下積木聽聲音，拖進煉金爐拼單字'}
           </p>
         </>
