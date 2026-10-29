@@ -64,8 +64,8 @@
 全部是預錄的**女聲**，App 不再混用男聲，也不再用逐字母 TTS 拼音：
 
 - **單音素（46 個，`public/audio/phonemes/`）**：38 個來自 Sound City Reading（SCR）女聲錄音（原檔在 `audio-src/scr/`）；8 個 SCR 沒有的母音／r 母音（oo 長短、aw、er、ar、or、air、弱化 ə）用 Kokoro 女聲 `af_nova` 合成。**子音一律不用 TTS 切**（合成子音聽起來太假），所以 SCR 沒有的子音 ʒ（television／treasure 的 s）目前沒有錄音，只有 `hop_s_si_z` 這一課會退回裝置 TTS。
-- **整字與短句（`public/audio/speech/`）**：所有課程例字、拼字／複習單字與短句，由同一個 Kokoro `af_nova` 聲音預先產生，混音（blend）與整字播放都用這些檔案；裝置 TTS 只在檔案不存在時（例如「試唸生字」的自由輸入）才當最後備援。
-- 所有檔案經 `scripts/build_audio.py` 統一裁切（前後靜音只留約 30 ms）、響度正規化到 −20 LUFS，輸出單聲道 24 kHz mp3。
+- **整字與短句（`public/audio/speech/`）**：所有課程例字、拼字／複習單字與短句，由同一個 Kokoro `af_nova` 聲音預先產生，混音（blend）與整字播放都用這些檔案（語速 0.8，比預設稍慢）；另外有一份更慢的版本 `public/audio/speech_slow/`（語速 0.6），給 🐢 按鈕用；裝置 TTS 只在檔案不存在時（例如「試唸生字」的自由輸入）才當最後備援。
+- 所有檔案經 `scripts/build_audio.py` 統一裁切（停止音前留約 100 ms、保留較完整的送氣，尾端漸弱約 60 ms，不硬切）、響度正規化到 −20 LUFS，輸出單聲道 24 kHz mp3。
 - 音素對應（`lib/phonemeClips.ts`）以 IPA 音素精確比對（不再用字串 `includes`），並有測試保證每一課的每個單字都對得到檔案。
 
 **授權：** Kokoro 模型權重為 Apache-2.0；它的訓練資料含 CC BY 素材（Koniwa tnc：CC BY 3.0、SIWIS：CC BY 4.0），在此標示出處。SCR 錄音版權屬原作者，請依其網站條款使用。已移除原本的 Wikimedia IPA 男聲錄音、`public/audio/soundcity/`、`public/audio/ipa/` 與舊的音檔 manifest。
@@ -74,7 +74,7 @@
 pip install -r scripts/requirements-audio.txt   # 只有重建音檔才需要（Python 3.10+、ffmpeg）
 npm run download:soundcity-audio   # 下載 SCR 原始錄音到 audio-src/scr/
 npm run export:speech-texts        # 從課程資料匯出所有要預錄的單字與短句 → data/speechTexts.json
-npm run build:audio                # 重新產生 public/audio/phonemes 與 public/audio/speech（首次會自動下載 Kokoro 模型到 .cache/kokoro）
+npm run build:audio                # 重新產生 public/audio/phonemes、public/audio/speech 與 public/audio/speech_slow（首次會自動下載 Kokoro 模型到 .cache/kokoro）
 ```
 
 ## 開發
@@ -112,3 +112,7 @@ components/mascot/        雲寶與裝飾（皆為原創 SVG）
 ## 下一步（第二階段，尚未實作）
 
 麥克風「矯正發音」：Web Speech 辨識、最小對立組、錄音比對、嘴型提示、無法判定的音改用 CVC 字、孩子友善的回饋、全程本機處理保護隱私。
+
+### 播放節奏（Sound-talk）
+
+所有間隔集中在 `lib/audioPacing.ts` 一處調整：切音區塊間隔 120 ms；Sound-talk 各段間隔 1 秒；「連起來念」每個音間隔 250 ms；連起來念之後停 800 ms 才念整字。複習／回想的單音素按一次只播一次；🐢 會把同一個音播兩次（中間隔 1 秒），整字則播 `speech_slow` 的慢速錄音。節奏靠間隔與獨立的慢速錄音達成，不對音檔做時間拉伸（避免嘶聲）。

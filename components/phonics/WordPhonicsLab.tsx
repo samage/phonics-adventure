@@ -6,6 +6,7 @@ import WordSoundDots, { getSplitDigraphIndices } from '@/components/phonics/Word
 import { BTN_PRIMARY, BTN_PINK, BTN_SECONDARY } from '@/components/ui/PageHeader';
 import { parseWordToBlocks } from '@/utils/phonicsEngine';
 import { isSilentBlock, speakBlockPhoneme } from '@/lib/letterSound';
+import { AUDIO_PACING } from '@/lib/audioPacing';
 import { playBlendDemo } from '@/lib/blendDemoAudio';
 import { speakWord, cancelSpeech } from '@/lib/speech';
 
@@ -46,7 +47,7 @@ export default function WordPhonicsLab({ word, onComplete }: WordPhonicsLabProps
     for (const { b, i } of playable) {
       setActiveIndex(i);
       await speakBlockPhoneme(b);
-      await delay(400);
+      await delay(AUDIO_PACING.soundTalkGapMs);
     }
     setActiveIndex(null);
     setPlaying(false);
@@ -68,7 +69,7 @@ export default function WordPhonicsLab({ word, onComplete }: WordPhonicsLabProps
         if (isSilentBlock(blocks[i])) continue;
         setActiveIndex(i);
         await speakBlockPhoneme(blocks[i]);
-        await delay(280);
+        await delay(AUDIO_PACING.soundTalkGapMs);
       }
       setActiveIndex(null);
       await speakWord(word);

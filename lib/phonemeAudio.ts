@@ -4,10 +4,11 @@
  */
 import type { PhonicsBlock } from '@/types/phonics';
 import { clipUrl, clipsForBlock, clipsForKey } from '@/lib/phonemeClips';
+import { AUDIO_PACING } from '@/lib/audioPacing';
 import { playAudioFile } from '@/lib/speech';
 
 /** 同一個積木裡（如 bl、str）相鄰兩個音的間隔：短，聽起來連在一起 */
-export const CLIP_GAP_MS = 60;
+export const CLIP_GAP_MS = AUDIO_PACING.blockClipGapMs;
 
 const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
 

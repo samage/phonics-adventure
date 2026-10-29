@@ -4,7 +4,7 @@
  * 只有「沒有預錄檔」的文字（例如自由輸入的生字）才退回裝置的 Web Speech API。
  */
 import audioManifest from '@/data/audioManifest.json';
-import { normalizeSpeechText, speechAudioPath } from '@/lib/speechFiles';
+import { normalizeSpeechText, speechAudioPath, speechSlowAudioPath } from '@/lib/speechFiles';
 
 const DEFAULT_LANG = 'en-US';
 const DEFAULT_RATE = 0.75;
@@ -110,12 +110,13 @@ export function hasPrerecordedSpeech(text: string): boolean {
   return PRERECORDED_TEXTS.has(normalizeSpeechText(text));
 }
 
-const SLOW_PLAYBACK_RATE = 0.6;
 const SLOW_TTS_RATE = 0.45;
+/** 慢速版檔案不存在時，退而求其次：把一般版放慢（保持音高） */
+const SLOW_FALLBACK_PLAYBACK_RATE = 0.75;
 
 /**
- * 唸出整個字或整句。預錄女聲優先（🐢 慢速用 playbackRate，保持音高），
- * 沒有預錄檔才用裝置 TTS。
+ * 唸出整個字或整句。預錄女聲優先；🐢 慢速播的是以較慢速度重新合成的預錄檔，
+ * 都沒有才用裝置 TTS。
  */
 export async function speakText(
   text: string,
@@ -123,16 +124,17 @@ export async function speakText(
 ): Promise<void> {
   cancelSpeech();
   if (hasPrerecordedSpeech(text)) {
-    const ok = await playAudioFile(
-      speechAudioPath(text),
-      options.slow ? SLOW_PLAYBACK_RATE : 1,
-    );
-    if (ok) return;
+    if (options.slow) {
+      if (await playAudioFile(speechSlowAudioPath(text))) return;
+      if (await playAudioFile(speechAudioPath(text), SLOW_FALLBACK_PLAYBACK_RATE)) return;
+    } else if (await playAudioFile(speechAudioPath(text))) {
+      return;
+    }
   }
   await speak(text, { rate: options.slow ? SLOW_TTS_RATE : DEFAULT_RATE });
 }
 
-/** 唸出完整單字（流暢、稍慢）。 */
+/** 唸出完整單字（預錄女聲，一般速度）。 */
 export function speakWord(word: string): Promise<void> {
   return speakText(word);
 }

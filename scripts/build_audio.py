@@ -43,6 +43,7 @@ ROOT = Path(__file__).resolve().parent.parent
 SCR_DIR = ROOT / "audio-src" / "scr"
 OUT_PHONEMES = ROOT / "public" / "audio" / "phonemes"
 OUT_SPEECH = ROOT / "public" / "audio" / "speech"
+OUT_SPEECH_SLOW = ROOT / "public" / "audio" / "speech_slow"
 CLIPS_JSON = ROOT / "data" / "phonemeClips.json"
 TEXTS_JSON = ROOT / "data" / "speechTexts.json"
 MANIFEST_JSON = ROOT / "data" / "audioManifest.json"
@@ -53,18 +54,28 @@ SR = 24000
 #: 選聲音的依據：所有 af_* 女聲中，F0 中位數與 SCR 錄音（約 179 Hz）最接近者（見 README）
 VOICE = "af_nova"
 SPEED_VOWEL = 0.8
-SPEED_WORD = 0.9
-SPEED_SENTENCE = 0.9
+SPEED_WORD = 0.8  # 一般整字：孩子聽得清楚的速度
+SPEED_SENTENCE = 0.8
+SPEED_WORD_SLOW = 0.6  # 🐢 慢速版（重新合成，不是把檔案拉慢）
+SPEED_SENTENCE_SLOW = 0.6
 
 TARGET_LUFS = -20.0
 PEAK_CEIL_DB = -1.0
-PAD_S = 0.030  # 聲音前後各留 30 ms
+PAD_S = 0.030  # 一般聲音前後各留 30 ms（整字／整句）
+# 孤立音素（慢速版）：前面留較長的自然起音、尾巴自然淡出，不要切得太趕
+STOP_LEAD_S = 0.100  # 爆破音前的靜音／起音空間
+CONT_LEAD_S = 0.060  # 母音、持續音前
+TAIL_PAD_S = 0.060  # 尾端靜音
+TAIL_FADE_S = 0.060  # 母音／持續音自然淡出
+TAIL_EXTRA_S = 0.060  # 主體結束後，原錄音若還有自然衰減，再多留這麼多
 LOUDNESS_BLOCK_S = 0.050
 
 # 爆破音切尾參數（秒）
 STOP_PRE_VOICED = 0.04  # 濁爆破音：爆破前保留的 prevoicing（讓人聽得出是濁音）
-STOP_KEEP = {"voiced_stop": 0.045, "voiceless_stop": 0.080}
-AFFRICATE_EXTRA = 0.0  # j：摩擦段結束後再留的時間
+# 濁爆破音：爆破後再多留就是母音（schwa），所以只能到這裡；清爆破音沒有母音，整段釋放／送氣都保留
+STOP_KEEP = {"voiced_stop": 0.060, "voiceless_stop": 0.300}
+STOP_FADE_S = 0.040
+AFFRICATE_EXTRA = 0.020  # j：摩擦段結束後再留的時間
 
 # 整字／整句：特例（G2P 唸不準或會唸成字母名時，直接給 IPA）
 WORD_IPA = {"a": "ɐ", "i": "ˈaɪ"}
@@ -138,42 +149,43 @@ def fade(x: np.ndarray, fin_s: float, fout_s: float) -> np.ndarray:
 
 def trim_scr(x: np.ndarray, kind: str | None) -> np.ndarray:
     a, b = main_event(x)
-    seg = x[a:b]
-    pad = int(PAD_S * SR)
+    pad_tail = np.zeros(int(TAIL_PAD_S * SR))
     if kind in ("voiced_stop", "voiceless_stop", "voiced_affricate"):
+        seg = x[a:b]
         burst = find_burst(seg)
         if kind == "voiced_affricate":
             # 摩擦段（高頻能量占比高）結束處
             hp = band_env(seg, 3000, None)
             tot = band_env(seg, 80, None)
             ratio = hp / tot
-            i0 = int(burst / (0.005 * SR))
-            i = i0
+            i = int(burst / (0.005 * SR))
             while i < len(ratio) and ratio[i] > 0.3:
                 i += 1
             end = int(i * 0.005 * SR + AFFRICATE_EXTRA * SR)
             start = max(0, burst - int(0.02 * SR))
         else:
-            keep = STOP_KEEP[kind]
-            end = burst + int(keep * SR)
+            end = burst + int(STOP_KEEP[kind] * SR)
             pre = STOP_PRE_VOICED if kind == "voiced_stop" else 0.0
             start = max(0, burst - int((pre + 0.005) * SR))
         seg = seg[start : min(len(seg), end)]
-        out = np.concatenate([np.zeros(pad), fade(seg, 0.003, 0.020), np.zeros(pad)])
-        return out
-    out = np.concatenate([np.zeros(pad), fade(seg, 0.010, 0.025), np.zeros(pad)])
-    return out
+        return np.concatenate([np.zeros(int(STOP_LEAD_S * SR)), fade(seg, 0.003, STOP_FADE_S), pad_tail])
+    # 母音／持續音：保留原錄音主體結束後的自然衰減，再慢慢淡出
+    b2 = min(len(x), b + int(TAIL_EXTRA_S * SR))
+    seg = x[a:b2]
+    return np.concatenate([np.zeros(int(CONT_LEAD_S * SR)), fade(seg, 0.010, TAIL_FADE_S), pad_tail])
 
 
-def trim_silence(x: np.ndarray, thresh_db: float = -38.0, pad_s: float = PAD_S) -> np.ndarray:
+def trim_silence(
+    x: np.ndarray, thresh_db: float = -38.0, pad_s: float = PAD_S, fade_out_s: float = 0.030, tail_pad_s: float | None = None
+) -> np.ndarray:
     """Kokoro 輸出：切掉首尾靜音，只留聲音前後 pad_s。"""
     db, h = env_db(x, hop=0.005, win=0.010)
     above = np.where(db > db.max() + thresh_db)[0] if len(db) else []
     if len(above) == 0:
         return x
     a = max(0, above[0] * h - int(pad_s * SR))
-    b = min(len(x), (above[-1] + 2) * h + int(pad_s * SR))
-    return fade(x[a:b], 0.005, 0.030)
+    b = min(len(x), (above[-1] + 2) * h + int((pad_s if tail_pad_s is None else tail_pad_s) * SR))
+    return fade(x[a:b], 0.005, fade_out_s)
 
 
 def loudness(x: np.ndarray) -> float:
@@ -256,7 +268,7 @@ def build_phonemes() -> list[str]:
         if c["source"] == "scr":
             x = trim_scr(decode(SCR_DIR / c["file"]), c.get("kind"))
         else:
-            x = trim_silence(tts_ipa(c["tts"], SPEED_VOWEL))
+            x = trim_silence(tts_ipa(c["tts"], SPEED_VOWEL), pad_s=CONT_LEAD_S, fade_out_s=TAIL_FADE_S, tail_pad_s=TAIL_PAD_S)
         write_mp3(normalise(x), OUT_PHONEMES / f"{c['id']}.mp3")
         ids.append(c["id"])
         print(f"  phoneme {c['id']:<14} {c['source']:<6} {len(x) / SR:.2f}s")
@@ -267,13 +279,15 @@ def slug(text: str) -> str:
     return text.replace(" ", "_").replace("'", "-")
 
 
-def render_speech(text: str, is_word: bool) -> np.ndarray:
+def render_speech(text: str, is_word: bool, slow: bool = False) -> np.ndarray:
+    w_speed = SPEED_WORD_SLOW if slow else SPEED_WORD
+    s_speed = SPEED_SENTENCE_SLOW if slow else SPEED_SENTENCE
     if is_word and text in WORD_IPA:
-        return tts_ipa(WORD_IPA[text], SPEED_WORD)
+        return tts_ipa(WORD_IPA[text], w_speed)
     spoken = " ".join("I" if w == "i" else w for w in text.split())
     if not is_word:
         spoken = spoken[0].upper() + spoken[1:] + "."
-    return tts_text(spoken, SPEED_WORD if is_word else SPEED_SENTENCE)
+    return tts_text(spoken, w_speed if is_word else s_speed)
 
 
 def build_speech() -> tuple[list[str], list[str]]:
@@ -281,8 +295,9 @@ def build_speech() -> tuple[list[str], list[str]]:
     words, sentences = [], []
     for kind, items, out in (("word", texts["words"], words), ("sentence", texts["sentences"], sentences)):
         for t in items:
-            x = trim_silence(render_speech(t, kind == "word"), pad_s=0.05)
-            write_mp3(normalise(x), OUT_SPEECH / f"{slug(t)}.mp3")
+            for slow, out_dir in ((False, OUT_SPEECH), (True, OUT_SPEECH_SLOW)):
+                x = trim_silence(render_speech(t, kind == "word", slow), pad_s=0.05)
+                write_mp3(normalise(x), out_dir / f"{slug(t)}.mp3")
             out.append(t)
         print(f"  {kind}: {len(items)} 個")
     return words, sentences

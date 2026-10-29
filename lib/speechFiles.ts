@@ -20,3 +20,8 @@ export function speechFileSlug(text: string): string {
 export function speechAudioPath(text: string): string {
   return `/audio/speech/${speechFileSlug(text)}.mp3`;
 }
+
+/** 🐢 慢速版整字／整句（Kokoro 以較慢速度重新合成，不是把檔案拉慢） */
+export function speechSlowAudioPath(text: string): string {
+  return `/audio/speech_slow/${speechFileSlug(text)}.mp3`;
+}

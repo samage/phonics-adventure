@@ -4,6 +4,7 @@ import { getPhonemeEntry } from '@/data/phonemeRegistry';
 import { playClips, playPhonemeBlock, playPhonemeKey } from '@/lib/phonemeAudio';
 import { hopTtsPhonemeFallback } from '@/lib/hopPhonemeAudio';
 import { resolveHopClips } from '@/lib/phonemeClips';
+import { AUDIO_PACING } from '@/lib/audioPacing';
 import { cancelSpeech, speak } from '@/lib/speech';
 
 /** 不發音的積木（Magic E 的 e、不發音的字母） */
@@ -30,7 +31,7 @@ export async function speakPhoneme(key: string): Promise<void> {
     if (pattern) {
       const clips = resolveHopClips(k);
       if (clips.length > 0) {
-        await playClips(clips, { gapMs: 400 });
+        await playClips(clips, { gapMs: AUDIO_PACING.hopClipGapMs });
         return;
       }
       await speak(hopTtsPhonemeFallback(k, pattern), { rate: 0.45, pitch: 1.0 });

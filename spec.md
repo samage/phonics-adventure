@@ -81,7 +81,7 @@
 課內與「多練一輪」共用同一個元件、同一套出題邏輯：
 
 1. 卡片顯示字母／拼法，孩子先大聲說。
-2. 🔊 播放真人音素，🐢 慢速（0.6 倍）。
+2. 🔊 播放真人音素，🐢 慢速：單音素連播兩次（間隔 1 秒）。
 3. 自評：**還不會**（立刻計為答錯、進今天複習）／**我會**（交給小測驗判定）。
 4. 小測驗 4 選 1：看字母選聲音，或選有該音的例字；干擾項取自易混淆組，且不洩題（見 `lib/recall/quiz.test.ts`）。
 5. 自評「不會」的項目，測驗結果不計入（避免剛看完答案就升盒）。
@@ -109,10 +109,10 @@
 | 單音素（46 個） | `/audio/phonemes/<id>.mp3`；SCR 女聲 38 個，Kokoro `af_nova` 母音 8 個（oo 長短、aw、er、ar、or、air、ə） |
 | 音素對應 | `lib/phonemeClips.ts`：IPA 音素精確比對（`aʊ`≠`ʊ`），`data/phonemeClips.json` 描述每個檔案的來源與裁切方式 |
 | 連音 | `blend:xx` — 逐字母依序播放對應的音素檔 |
-| 混音／整字／短句 | `/audio/speech/<slug>.mp3`（Kokoro `af_nova`，由課程資料自動匯出），🐢 慢速為播放速率 0.6 |
+| 混音／整字／短句 | `/audio/speech/<slug>.mp3`（Kokoro `af_nova`，由課程資料自動匯出），語速 0.8；🐢 慢速播 `/audio/speech_slow/<slug>.mp3`（語速 0.6） |
 | 沒有檔案的 ʒ、自由輸入的字 | 裝置 TTS（最後備援） |
 
-後製：`scripts/build_audio.py` 裁掉前後靜音（保留約 30 ms）、響度正規化到 −20 LUFS；子音不使用 TTS 合成。不規則字（come、what、word…）的切片見 `data/curatedIrregularWords.ts`。
+後製：`scripts/build_audio.py` 裁切（停止音前留約 100 ms、保留較完整送氣，尾端漸弱約 60 ms）、響度正規化到 −20 LUFS；子音不使用 TTS 合成。不規則字（come、what、word…）的切片見 `data/curatedIrregularWords.ts`。
 
 授權：Kokoro 權重 Apache-2.0（訓練資料含 CC BY 素材，見 README）；SCR 錄音版權屬原作者，請依其網站條款使用；Wikimedia 男聲與舊的 soundcity／ipa 目錄、manifest 已移除。
 
@@ -166,3 +166,5 @@ npm run build:audio
 ## 十、第二階段（尚未實作）：矯正發音
 
 麥克風檢查 → Web Speech 辨識評估 → 最小對立組 → 錄音比對 → 嘴型提示 → 辨識不了的音改用 CVC 字 → 孩子友善回饋 → 全程本機處理（不上傳語音）。
+
+**播放節奏：** 所有間隔常數集中在 `lib/audioPacing.ts`（Sound-talk 各段 1 秒、連起來念 250 ms、念整字前停 800 ms）。
