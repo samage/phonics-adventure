@@ -2,7 +2,7 @@ import type { PhonicsType } from '@/types/phonics';
 import { THEME_COLORS } from '@/constants/themeColors';
 
 /** 希平方入門班課程會出現的發音類型（對應積木顏色） */
-export const HOP_CURRICULUM_LEGEND_TYPES: PhonicsType[] = [
+const HOP_CURRICULUM_LEGEND_TYPES: PhonicsType[] = [
   'consonant',
   'short_vowel',
   'long_vowel',
@@ -35,7 +35,7 @@ export default function PhonicsTypeLegend({
                 border: `2px solid ${color.border}`,
               }}
             />
-            <span className="font-medium text-amber-900">{color.label}</span>
+            <span className="font-medium text-sky-900">{color.label}</span>
           </div>
         );
       })}

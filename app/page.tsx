@@ -1,5 +1,5 @@
 import LearningMap from '@/components/learn/LearningMap';
-import HomeEntries from '@/components/home/HomeEntries';
+import HomeToday from '@/components/home/HomeToday';
 import Mascot from '@/components/mascot/Mascot';
 import { Star } from '@/components/mascot/Decor';
 
@@ -18,7 +18,7 @@ export default function Home() {
         <p className="text-base text-sky-700">跟雲寶一起，看到字母就會唸 ☁️</p>
       </header>
 
-      <HomeEntries />
+      <HomeToday />
       <LearningMap />
     </main>
   );

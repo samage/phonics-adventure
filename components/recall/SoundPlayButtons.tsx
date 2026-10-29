@@ -4,7 +4,7 @@ import { useCallback, useState } from 'react';
 import { playRecallSound } from '@/lib/recall/audio';
 import { speakGrapheme } from '@/lib/letterSound';
 
-interface RecallSoundButtonsProps {
+interface SoundPlayButtonsProps {
   audio: string;
   /** 沒有預錄音時的後備：用字母本身念 */
   fallbackKey?: string;
@@ -14,13 +14,13 @@ interface RecallSoundButtonsProps {
 }
 
 /** 🔊 正常速度＋ 🐢 慢速，播放的是真正的音素錄音（不是字母名稱） */
-export default function RecallSoundButtons({
+export default function SoundPlayButtons({
   audio,
   fallbackKey,
   onPlayed,
   size = 'lg',
   label = true,
-}: RecallSoundButtonsProps) {
+}: SoundPlayButtonsProps) {
   const [playing, setPlaying] = useState<'normal' | 'slow' | null>(null);
 
   const play = useCallback(

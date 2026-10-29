@@ -50,26 +50,3 @@ export async function playBlendDemo(
   onStep?.(null);
   return true;
 }
-
-export async function playBlendPartial(
-  word: string,
-  filledCount: number,
-): Promise<void> {
-  cancelSpeech();
-  const blocks = parseWordToBlocks(word).filter((b) => b.type !== 'silent_e');
-  if (filledCount < 1 || blocks.length === 0) return;
-
-  await speakBlockPhoneme(blocks[0]);
-  if (filledCount < 2) return;
-
-  await delay(260);
-  for (let i = 1; i < Math.min(filledCount, blocks.length); i++) {
-    await speakBlockPhoneme(blocks[i]);
-    await delay(200);
-  }
-}
-
-/** @deprecated 改用 playBlendDemo */
-export const playJunyiBlendDemo = playBlendDemo;
-/** @deprecated 改用 playBlendPartial */
-export const playJunyiBlendPartial = playBlendPartial;

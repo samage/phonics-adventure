@@ -1,10 +1,3 @@
-import type { PhonicsBlock } from '@/types/phonics';
-import { speakBlockPhoneme } from '@/lib/phonicsAudio';
-import {
-  speakSmoothPhonemeBlend,
-  speakSmoothWordDemo,
-} from '@/lib/smoothBlend';
-
 /**
  * 語音控制模組。
  * 音素：Sound City Reading 預錄音檔；整字與備援：Web Speech API。
@@ -72,63 +65,6 @@ export function playAudioFile(src: string, rate = 1): Promise<boolean> {
   });
 }
 
-/** 播放音檔前段（混音拼讀從例字截取音素用） */
-export function playAudioFileSegment(src: string, durationMs: number): Promise<boolean> {
-  return playAudioFileRange(src, 0, durationMs);
-}
-
-/** 播放音檔指定區段（從例字截取首音／韻尾用） */
-export function playAudioFileRange(
-  src: string,
-  startMs: number,
-  durationMs?: number,
-): Promise<boolean> {
-  return new Promise((resolve) => {
-    if (typeof window === 'undefined') {
-      resolve(false);
-      return;
-    }
-
-    stopActiveAudio();
-    if (isSpeechAvailable()) {
-      window.speechSynthesis.cancel();
-    }
-
-    const audio = new Audio(src);
-    activeAudio = audio;
-    let timer: ReturnType<typeof setTimeout> | null = null;
-
-    const finish = (ok: boolean) => {
-      if (timer) clearTimeout(timer);
-      audio.pause();
-      if (activeAudio === audio) activeAudio = null;
-      resolve(ok);
-    };
-
-    audio.onerror = () => finish(false);
-    audio.onended = () => {
-      if (!durationMs) finish(true);
-    };
-
-    const begin = () => {
-      if (startMs > 0) {
-        audio.currentTime = startMs / 1000;
-      }
-      void audio
-        .play()
-        .then(() => {
-          if (durationMs && durationMs > 0) {
-            timer = setTimeout(() => finish(true), durationMs);
-          }
-        })
-        .catch(() => finish(false));
-    };
-
-    if (audio.readyState >= 1) begin();
-    else audio.addEventListener('loadedmetadata', begin, { once: true });
-  });
-}
-
 /**
  * 以原生 TTS 唸出一段文字（主要用於完整單字，不用於單字母）。
  */
@@ -166,15 +102,3 @@ export function speakWord(word: string): Promise<void> {
   cancelSpeech();
   return speak(word, { rate: DEFAULT_RATE });
 }
-
-/** 唸出單一發音積木的音素。 */
-export async function speakBlock(block: PhonicsBlock): Promise<void> {
-  return speakBlockPhoneme(block);
-}
-
-/** 平滑混音：音素緊密相接，完成後可接整字。 */
-export async function speakBlend(blocks: PhonicsBlock[]): Promise<void> {
-  return speakSmoothPhonemeBlend(blocks);
-}
-
-export { speakSmoothWordDemo };

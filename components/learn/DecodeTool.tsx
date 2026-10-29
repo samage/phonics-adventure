@@ -1,13 +1,13 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
 import WordPhonicsLab from '@/components/phonics/WordPhonicsLab';
 import { getTrickyWord, isTrickyWord } from '@/data/trickyWords';
 import { decodeWordAnalysis } from '@/utils/phonicsEngine';
+import { BTN_PRIMARY } from '@/components/ui/PageHeader';
 import { speakWord } from '@/lib/speech';
 
-export default function DecodeWordActivity() {
+export default function DecodeTool() {
   const [input, setInput] = useState('');
   const [activeWord, setActiveWord] = useState<string | null>(null);
   const [message, setMessage] = useState('');
@@ -41,7 +41,7 @@ export default function DecodeWordActivity() {
 
   return (
     <div className="flex w-full max-w-xl flex-col items-center gap-6">
-      <p className="text-center text-lg text-purple-900">
+      <p className="text-center text-lg text-sky-900">
         輸入任意英文單字，試著拆音、混音唸出來
       </p>
       <form onSubmit={handleSubmit} className="flex w-full gap-2">
@@ -50,20 +50,20 @@ export default function DecodeWordActivity() {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder="例如 mop、ship、cake"
-          className="flex-1 rounded-2xl border-2 border-purple-200 px-4 py-3 text-xl text-amber-950"
+          className="flex-1 rounded-2xl border-2 border-sky-200 px-4 py-3 text-xl text-sky-950"
           autoCapitalize="off"
           autoCorrect="off"
           spellCheck={false}
         />
         <button
           type="submit"
-          className="rounded-2xl bg-purple-500 px-6 py-3 text-lg text-white"
+          className={BTN_PRIMARY}
         >
           試唸
         </button>
       </form>
       {message && (
-        <div className="w-full rounded-xl bg-rose-50 px-4 py-3 text-rose-900">
+        <div className="w-full rounded-xl bg-pink-50 px-4 py-3 text-pink-900">
           {message}
           {isTrickyWord(input.trim().toLowerCase()) && (
             <button
@@ -79,9 +79,6 @@ export default function DecodeWordActivity() {
       {activeWord && (
         <WordPhonicsLab key={activeWord} word={activeWord} />
       )}
-      <Link href="/" className="text-amber-700 underline">
-        ← 回到課程路徑
-      </Link>
     </div>
   );
 }

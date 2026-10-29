@@ -1,7 +1,6 @@
 'use client';
 
 import type { PhonicsBlock } from '@/types/phonics';
-import { getBlendHintForBlock } from '@/data/blendPedagogy';
 import { getThemeColor } from '@/constants/themeColors';
 
 interface PhonicsBlockCardProps {
@@ -14,8 +13,6 @@ interface PhonicsBlockCardProps {
   dimmed?: boolean;
   /** 是否在積木下方顯示發音類型標籤（子音 / 短母音） */
   showLabel?: boolean;
-  /** 混音模式：顯示中文提示（絲、誒、特） */
-  showBlendHint?: boolean;
   /** 多拼法顯示（d / dd）時縮小字級 */
   multiSpelling?: boolean;
   size?: 'md' | 'lg' | 'xl';
@@ -43,12 +40,10 @@ export default function PhonicsBlockCard({
   highlighted = false,
   dimmed = false,
   showLabel = false,
-  showBlendHint = false,
   multiSpelling = false,
   size = 'lg',
 }: PhonicsBlockCardProps) {
   const color = getThemeColor(block.type);
-  const blendHint = showBlendHint ? getBlendHintForBlock(block) : null;
   const sizeClass = multiSpelling && block.text.includes('/')
     ? MULTI_SIZE_CLASS[size]
     : SIZE_CLASS[size];
@@ -74,11 +69,6 @@ export default function PhonicsBlockCard({
       >
         {block.text}
       </div>
-      {showBlendHint && blendHint && (
-        <span className="text-xl font-bold tracking-widest text-amber-800">
-          {blendHint}
-        </span>
-      )}
       {showLabel && (
         <span
           className="rounded-full px-3 py-0.5 text-sm font-medium"

@@ -28,13 +28,6 @@ export default function LearningMap() {
       </div>
 
       <LessonPath />
-
-      <a
-        href="/play/decode"
-        className="rounded-3xl bg-white/90 px-6 py-4 text-center text-lg font-semibold text-purple-800 shadow-md hover:bg-white"
-      >
-        試唸生字 → Sound buttons · 切音 · 混音
-      </a>
     </div>
   );
 }

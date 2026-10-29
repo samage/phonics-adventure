@@ -562,22 +562,3 @@ export const CURATED_WORDS: Record<string, PhonicsBlock[]> = {
 };
 
 Object.assign(CURATED_WORDS, CURATED_BLEND_WORDS);
-
-/** @deprecated 課程單字改由 data/curriculum 驅動；保留供向後相容 */
-export const ALCHEMIST_WORDS: string[] = [
-  'cat',
-  'dog',
-  'sun',
-  'pig',
-  'bed',
-  'ship',
-  'fish',
-  'chip',
-  'frog',
-  'stop',
-  'cake',
-  'bike',
-  'rain',
-  'boat',
-  'train',
-];

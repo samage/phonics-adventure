@@ -1,7 +1,7 @@
 import manifest from '@/data/scrSupplementPhonemeManifest.json';
 import { playAudioFile } from '@/lib/speech';
 
-export interface ScrSupplementEntry {
+interface ScrSupplementEntry {
   key: string;
   variant: string;
   localFile: string;
@@ -32,8 +32,4 @@ export async function playScrSupplementKey(key: string): Promise<boolean> {
   const name = key.toLowerCase();
   if (!BY_LOCAL_NAME.has(name)) return false;
   return playAudioFile(scrSupplementAudioPath(name));
-}
-
-export function getScrSupplementEntries(): ScrSupplementEntry[] {
-  return [...SUPPLEMENT];
 }

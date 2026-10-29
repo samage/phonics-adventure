@@ -21,7 +21,7 @@ function isSingleLetter(char: string): boolean {
   return /^[a-z]$/i.test(char);
 }
 
-export function resolveBlockAudioKey(block: PhonicsBlock): string {
+function resolveBlockAudioKey(block: PhonicsBlock): string {
   const text = block.text.toLowerCase();
 
   if (text.includes('_e') && text.length >= 3) {
@@ -103,4 +103,3 @@ export async function speakBlockPhoneme(block: PhonicsBlock): Promise<void> {
   return speakPhoneme(key);
 }
 
-export { speakPhoneme as speakLetterSound };

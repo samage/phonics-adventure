@@ -20,7 +20,7 @@ export interface LetterPhonicsMeta {
  *
  * 長母音、母音團隊、Magic E 等留待階段四以後，不在此出現。
  */
-export const LETTER_PHONICS: Record<string, LetterPhonicsMeta> = {
+const LETTER_PHONICS: Record<string, LetterPhonicsMeta> = {
   a: {
     letter: 'a',
     phonicsType: 'short_vowel',
@@ -234,8 +234,3 @@ export const LETTER_PHONICS: Record<string, LetterPhonicsMeta> = {
 export function getLetterPhonics(letter: string): LetterPhonicsMeta | null {
   return LETTER_PHONICS[letter.toLowerCase()] ?? null;
 }
-
-export const STAGE1_SHORT_VOWELS = ['a', 'e', 'i', 'o', 'u'] as const;
-export const STAGE1_CONSONANTS = Object.keys(LETTER_PHONICS).filter(
-  (l) => LETTER_PHONICS[l].phonicsType === 'consonant',
-);

@@ -78,7 +78,7 @@ export const GRAPHEME_PHONEMES: Record<string, PhonemeEntry> = {
 };
 
 /** Magic E 規則說明（非音素，僅 L08 介紹用） */
-export const MAGIC_E_RULE: PhonemeEntry = {
+const MAGIC_E_RULE: PhonemeEntry = {
   key: 'magic_e_rule',
   ipa: '',
   fallback: 'magic e makes the vowel long',
@@ -92,24 +92,4 @@ export function getPhonemeEntry(key: string): PhonemeEntry | null {
     GRAPHEME_PHONEMES[k] ??
     (k === 'magic_e' || k === 'magic_e_rule' ? MAGIC_E_RULE : null)
   );
-}
-
-export function phonemeAudioPath(_key: string): string {
-  return '';
-}
-
-/** 取得所有需產生音檔的 key → ipa */
-export function getAllPhonemeKeysForGeneration(): Array<{ key: string; ipa: string }> {
-  const entries = [
-    ...Object.values(LETTER_PHONEMES),
-    ...Object.values(LONG_VOWEL_PHONEMES),
-    ...Object.values(GRAPHEME_PHONEMES),
-    MAGIC_E_RULE,
-  ];
-  return entries
-    .filter((e) => e.ipa.length > 0 || e.key === 'magic_e_rule')
-    .map((e) => ({
-      key: e.key,
-      ipa: e.ipa || e.fallback,
-    }));
 }

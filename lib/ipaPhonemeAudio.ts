@@ -1,7 +1,7 @@
 import manifest from '@/data/ipaPhonemeManifest.json';
 import { playAudioFile } from '@/lib/speech';
 
-export interface IpaPhonemeEntry {
+interface IpaPhonemeEntry {
   hopKey: string;
   ipa: string;
   localFile: string;
@@ -31,8 +31,4 @@ export async function playIpaHopPhoneme(hopKey: string): Promise<boolean> {
   const path = ipaAudioPath(hopKey);
   if (!path) return false;
   return playAudioFile(path);
-}
-
-export function getIpaHopEntries(): IpaPhonemeEntry[] {
-  return [...IPA_MANIFEST];
 }

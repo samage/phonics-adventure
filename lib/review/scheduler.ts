@@ -9,12 +9,12 @@
  * 概念沿用姊妹專案 word-buddy 的 mastery.ts（Leitner 盒子 + 本地日期）。
  */
 
-export const MAX_BOX = 5;
+const MAX_BOX = 5;
 /** 各盒子的複習間隔（天）；索引 = 盒子編號（索引 0 不使用，留作對齊） */
-export const BOX_INTERVAL_DAYS = [0, 1, 2, 4, 8, 16] as const;
+const BOX_INTERVAL_DAYS = [0, 1, 2, 4, 8, 16] as const;
 export const PLACED_BOX = 3;
 
-export type Box = 1 | 2 | 3 | 4 | 5;
+type Box = 1 | 2 | 3 | 4 | 5;
 
 export interface ReviewRecord {
   box: Box;
@@ -108,11 +108,6 @@ export function dueIds(map: ReviewMap, today: string, limit?: number): string[] 
 
 export function dueCount(map: ReviewMap, today: string): number {
   return Object.values(map).filter((r) => isDue(r, today)).length;
-}
-
-/** 已熟練：盒子 4 以上 */
-export function isMastered(rec: ReviewRecord | undefined): boolean {
-  return !!rec && rec.box >= 4;
 }
 
 export function sanitizeReviewMap(raw: unknown): ReviewMap {

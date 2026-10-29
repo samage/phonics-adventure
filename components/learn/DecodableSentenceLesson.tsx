@@ -1,9 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
 import { fireConfetti } from '@/components/ConfettiBurst';
 import WordPhonicsLab from '@/components/phonics/WordPhonicsLab';
+import { BTN_SECONDARY } from '@/components/ui/PageHeader';
 import { speakWord } from '@/lib/speech';
 
 interface DecodableSentenceLessonProps {
@@ -38,23 +38,23 @@ export default function DecodableSentenceLesson({
   };
 
   if (!sentence) {
-    return <p className="text-amber-700">尚無短句資料。</p>;
+    return <p className="text-sky-700">尚無短句資料。</p>;
   }
 
   return (
     <div className="flex w-full max-w-xl flex-col items-center gap-6">
-      <p className="text-lg font-semibold text-purple-900">讀短句</p>
-      <p className="text-center text-3xl font-bold leading-relaxed text-amber-950">
+      <p className="text-lg font-semibold text-sky-900">讀短句</p>
+      <p className="text-center text-3xl font-bold leading-relaxed text-sky-950">
         {sentence}
       </p>
       <button
         type="button"
         onClick={() => speakWord(sentence.replace(/[.!?]/g, ''))}
-        className="rounded-full bg-amber-100 px-6 py-2 text-amber-900"
+        className={BTN_SECONDARY}
       >
         🔊 聽整句
       </button>
-      <p className="text-sm text-amber-700">
+      <p className="text-sm text-sky-700">
         句 {sentenceIndex + 1}/{sentences.length} · 字 {wordIndex + 1}/{words.length}
       </p>
       {currentWord && (

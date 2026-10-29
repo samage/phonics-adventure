@@ -2,8 +2,8 @@
 
 import { useCallback, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
-import SoundButtons, { getSplitDigraphIndices } from '@/components/phonics/SoundButtons';
-import type { PhonicsBlock } from '@/types/phonics';
+import WordSoundDots, { getSplitDigraphIndices } from '@/components/phonics/WordSoundDots';
+import { BTN_PRIMARY, BTN_PINK, BTN_SECONDARY } from '@/components/ui/PageHeader';
 import { parseWordToBlocks } from '@/utils/phonicsEngine';
 import { speakBlockPhoneme } from '@/lib/letterSound';
 import { playBlendDemo } from '@/lib/blendDemoAudio';
@@ -13,23 +13,15 @@ type LabStep = 'buttons' | 'sound_talk' | 'blend' | 'done';
 
 interface WordPhonicsLabProps {
   word: string;
+  /** 混音聽完後按「下一個」才會呼叫（沒給就不顯示按鈕，例如單獨試唸） */
   onComplete?: () => void;
-  autoAdvance?: boolean;
-}
-
-function playableBlocks(blocks: PhonicsBlock[]): PhonicsBlock[] {
-  return blocks.filter((b) => b.type !== 'silent_e');
 }
 
 function delay(ms: number): Promise<void> {
   return new Promise((r) => setTimeout(r, ms));
 }
 
-export default function WordPhonicsLab({
-  word,
-  onComplete,
-  autoAdvance = false,
-}: WordPhonicsLabProps) {
+export default function WordPhonicsLab({ word, onComplete }: WordPhonicsLabProps) {
   const blocks = useMemo(() => parseWordToBlocks(word), [word]);
   const splitIndices = useMemo(() => getSplitDigraphIndices(blocks), [blocks]);
   const [step, setStep] = useState<LabStep>('buttons');
@@ -58,8 +50,7 @@ export default function WordPhonicsLab({
     }
     setActiveIndex(null);
     setPlaying(false);
-    if (autoAdvance) setStep('blend');
-  }, [blocks, autoAdvance]);
+  }, [blocks]);
 
   const runBlend = useCallback(async () => {
     cancelSpeech();
@@ -84,23 +75,22 @@ export default function WordPhonicsLab({
     }
     setPlaying(false);
     setStep('done');
-    onComplete?.();
-  }, [word, blocks, onComplete]);
+  }, [word, blocks]);
 
   return (
     <div className="flex w-full max-w-xl flex-col items-center gap-6">
-      <p className="text-center text-lg font-semibold text-purple-900">{stepLabel[step]}</p>
+      <p className="text-center text-lg font-semibold text-sky-900">{stepLabel[step]}</p>
 
       <motion.p
         key={word}
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
-        className="text-5xl font-bold tracking-wider text-amber-950"
+        className="text-5xl font-bold tracking-wider text-sky-950"
       >
         {word}
       </motion.p>
 
-      <SoundButtons
+      <WordSoundDots
         blocks={blocks}
         word={word}
         activeIndex={activeIndex}
@@ -114,8 +104,8 @@ export default function WordPhonicsLab({
             className={[
               'rounded-full px-3 py-1 text-sm',
               step === s || (step === 'done' && s === 'blend')
-                ? 'bg-purple-500 text-white'
-                : 'bg-purple-100 text-purple-800',
+                ? 'bg-sky-500 text-white'
+                : 'bg-white/80 text-sky-800',
             ].join(' ')}
           >
             {s === 'buttons' ? '① 看音' : s === 'sound_talk' ? '② 切音' : '③ 混音'}
@@ -129,59 +119,29 @@ export default function WordPhonicsLab({
             type="button"
             disabled={playing}
             onClick={() => void runSoundTalk()}
-            className="rounded-full bg-purple-500 px-8 py-3 text-xl text-white shadow-[0_4px_0_#6a1b9a] disabled:opacity-50"
+            className={`${BTN_PRIMARY} disabled:opacity-50`}
           >
             開始切音 →
           </button>
         )}
         {step === 'sound_talk' && !playing && (
-          <button
-            type="button"
-            onClick={() => void runSoundTalk()}
-            className="rounded-full bg-amber-100 px-6 py-2 text-amber-900"
-          >
-            🔊 再聽切音
-          </button>
+          <>
+            <button type="button" onClick={() => void runSoundTalk()} className={BTN_SECONDARY}>
+              🔊 再聽切音
+            </button>
+            <button type="button" onClick={() => void runBlend()} className={BTN_PINK}>
+              混音 →
+            </button>
+          </>
         )}
-        {(step === 'sound_talk' || step === 'buttons') && !playing && step !== 'buttons' && (
-          <button
-            type="button"
-            onClick={() => void runBlend()}
-            className="rounded-full bg-green-500 px-8 py-3 text-xl text-white shadow-[0_4px_0_#2e7d32]"
-          >
-            混音 →
-          </button>
-        )}
-        {step === 'sound_talk' && !playing && (
-          <button
-            type="button"
-            onClick={() => void runBlend()}
-            className="rounded-full bg-green-500 px-8 py-3 text-xl text-white"
-          >
-            跳過切音，直接混音
-          </button>
-        )}
-        {step === 'blend' && playing && (
-          <p className="text-amber-700">播放中…</p>
-        )}
+        {step === 'blend' && playing && <p className="text-sky-700">播放中…</p>}
         {step === 'done' && (
           <>
-            <button
-              type="button"
-              onClick={() => {
-                setStep('buttons');
-                void runBlend();
-              }}
-              className="rounded-full bg-amber-100 px-6 py-2 text-amber-900"
-            >
+            <button type="button" onClick={() => void runBlend()} className={BTN_SECONDARY}>
               🔊 再聽一次
             </button>
             {onComplete && (
-              <button
-                type="button"
-                onClick={onComplete}
-                className="rounded-full bg-green-500 px-8 py-3 text-xl text-white"
-              >
+              <button type="button" onClick={onComplete} className={BTN_PRIMARY}>
                 下一個 →
               </button>
             )}

@@ -1,11 +1,9 @@
 import type { PhonicsBlock } from '@/types/phonics';
 import {
-  getHopPattern,
   HOP_PATTERN_MAP,
   type HopEnglishPattern,
 } from '@/data/hopEnglishPatterns';
 
-export type { HopEnglishPattern };
 
 export interface GraphemePhonicsMeta {
   key: string;
@@ -33,7 +31,7 @@ function toMeta(p: HopEnglishPattern): GraphemePhonicsMeta {
   };
 }
 
-export const GRAPHEME_PHONICS: Record<string, GraphemePhonicsMeta> =
+const GRAPHEME_PHONICS: Record<string, GraphemePhonicsMeta> =
   Object.fromEntries(
     Object.values(HOP_PATTERN_MAP).map((p) => [p.key, toMeta(p)]),
   );

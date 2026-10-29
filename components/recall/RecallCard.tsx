@@ -4,7 +4,7 @@ import { useState } from 'react';
 import type { RecallItem } from '@/data/recall/items';
 import { speakWord } from '@/lib/speech';
 import Mascot from '@/components/mascot/Mascot';
-import RecallSoundButtons from './SoundButtons';
+import SoundPlayButtons from './SoundPlayButtons';
 
 interface RecallCardProps {
   item: RecallItem;
@@ -44,7 +44,7 @@ export default function RecallCard({ item, index, total, onRate }: RecallCardPro
           </span>
         )}
 
-        <RecallSoundButtons
+        <SoundPlayButtons
           audio={item.audio}
           fallbackKey={item.patternKey ?? item.display}
           onPlayed={() => setHeard(true)}

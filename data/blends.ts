@@ -25,12 +25,6 @@ export const BLEND_LESSONS: BlendLessonDef[] = [
   { id: 'BL9', key: 'blends_three', blends: ['str', 'spr', 'scr', 'spl'], words: ['strap', 'strip', 'scrap', 'scrub', 'split', 'sprint'], hint: '三個子音連在一起：s + t + r，每個音都要輕輕唸出來。' },
 ];
 
-export const BLEND_KEY_SET = new Set(BLEND_LESSONS.map((b) => b.key));
-
-export function isBlendLessonKey(key: string): boolean {
-  return BLEND_KEY_SET.has(key);
-}
-
 export function getBlendLesson(key: string): BlendLessonDef | null {
   return BLEND_LESSONS.find((b) => b.key === key) ?? null;
 }

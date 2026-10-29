@@ -3,7 +3,7 @@
 import { useCallback, useMemo, useSyncExternalStore } from 'react';
 import type { UnitId } from '@/types/curriculum';
 import type { PlacementResult } from '@/lib/placement/placement';
-import { getDueCount, getDueIds, createProgressHelpers } from './ProgressStore';
+import { getDueCount, getDueIds, createProgressHelpers } from './logic';
 import { getProgressStore } from './LocalProgressStore';
 import type { ReviewOutcome } from '@/lib/review/scheduler';
 import { todayString } from '@/lib/review/scheduler';
@@ -35,11 +35,6 @@ export function useProgress() {
 
   const setCurrentLesson = useCallback(
     (lessonId: string | null) => store.setCurrentLesson(lessonId),
-    [store],
-  );
-
-  const recordWordAttempt = useCallback(
-    (word: string, correct: boolean) => store.recordWordAttempt(word, correct),
     [store],
   );
 
@@ -82,7 +77,6 @@ export function useProgress() {
     hydrated,
     completeLesson,
     setCurrentLesson,
-    recordWordAttempt,
     recordGraphemeOutcome,
     applyPlacementResult,
     isLessonCompleted,

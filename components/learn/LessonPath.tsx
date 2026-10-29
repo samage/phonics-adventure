@@ -66,7 +66,7 @@ export default function LessonPath() {
         ))}
       </div>
 
-      <div className="flex items-center justify-between px-1 text-sm text-amber-700/70">
+      <div className="flex items-center justify-between px-1 text-sm text-sky-700/70">
         <button
           type="button"
           disabled={activeIndex === 0}
@@ -108,8 +108,8 @@ export default function LessonPath() {
             className="mb-3 rounded-xl px-4 py-2"
             style={{ backgroundColor: `${activeUnit.accent}22` }}
           >
-            <p className="font-bold text-amber-900">{activeUnit.title}</p>
-            <p className="text-sm text-amber-800/70">{activeUnit.description}</p>
+            <p className="font-bold text-sky-900">{activeUnit.title}</p>
+            <p className="text-sm text-sky-800/70">{activeUnit.description}</p>
           </div>
 
           <div className="flex max-h-[min(58vh,520px)] flex-col gap-2 overflow-y-auto pr-1">
@@ -122,7 +122,7 @@ export default function LessonPath() {
             ))}
           </div>
 
-          <p className="mt-3 text-center text-xs text-amber-700/50">
+          <p className="mt-3 text-center text-xs text-sky-700/50">
             左右滑動可切換單元
           </p>
         </motion.div>
@@ -156,8 +156,8 @@ function UnitTab({
         backgroundColor: active ? `${unit.accent}33` : 'rgba(255,255,255,0.85)',
       }}
     >
-      <p className="text-sm font-bold text-amber-900">{unit.title}</p>
-      <p className="text-xs text-amber-800/60">
+      <p className="text-sm font-bold text-sky-900">{unit.title}</p>
+      <p className="text-xs text-sky-800/60">
         {hydrated ? `${progress.completed}/${progress.total} 堂` : '—'}
       </p>
     </button>

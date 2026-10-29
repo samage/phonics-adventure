@@ -3,7 +3,7 @@
 import { motion } from 'framer-motion';
 import type { PhonicsBlock } from '@/types/phonics';
 
-interface SoundButtonsProps {
+interface WordSoundDotsProps {
   blocks: PhonicsBlock[];
   word: string;
   activeIndex?: number | null;
@@ -27,12 +27,12 @@ function isSplitDigraph(
   return last?.type === 'silent_e';
 }
 
-export default function SoundButtons({
+export default function WordSoundDots({
   blocks,
   word,
   activeIndex = null,
   splitDigraphIndices = null,
-}: SoundButtonsProps) {
+}: WordSoundDotsProps) {
   const letters = word.split('');
   // 每個積木對應到單字裡的哪幾個字母（靜音 e 不佔位置）
   const slices: string[] = [];
@@ -56,12 +56,12 @@ export default function SoundButtons({
                 <span
                   className={[
                     'text-4xl font-bold tracking-wide',
-                    activeIndex === blockIndex ? 'text-purple-700' : 'text-gray-400',
+                    activeIndex === blockIndex ? 'text-pink-600' : 'text-sky-300',
                   ].join(' ')}
                 >
                   e
                 </span>
-                <span className="mt-1 text-[10px] text-gray-400">靜音</span>
+                <span className="mt-1 text-[10px] text-sky-300">靜音</span>
               </div>
             );
           }
@@ -78,7 +78,7 @@ export default function SoundButtons({
               <span
                 className={[
                   'text-4xl font-bold tracking-wide',
-                  active ? 'text-purple-700 scale-110' : 'text-amber-950',
+                  active ? 'text-pink-600 scale-110' : 'text-sky-950',
                   'transition-transform',
                 ].join(' ')}
               >
@@ -90,7 +90,7 @@ export default function SoundButtons({
                     layout
                     className={[
                       'h-1 rounded-full',
-                      active ? 'bg-purple-500 w-full min-w-[2rem]' : 'bg-amber-400 w-full min-w-[1.5rem]',
+                      active ? 'bg-pink-400 w-full min-w-[2rem]' : 'bg-sky-300 w-full min-w-[1.5rem]',
                     ].join(' ')}
                   />
                 ) : (
@@ -98,7 +98,7 @@ export default function SoundButtons({
                     layout
                     className={[
                       'h-2.5 w-2.5 rounded-full',
-                      active ? 'bg-purple-500 scale-125' : 'bg-amber-500',
+                      active ? 'bg-pink-400 scale-125' : 'bg-sky-400',
                     ].join(' ')}
                   />
                 )}

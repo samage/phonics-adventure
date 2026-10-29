@@ -2,8 +2,7 @@
 
 /*
  * 雲寶主題：天空藍＋白色的粉彩配色、雲朵與星星、咖啡廳甜點、圓潤字型、柔和陰影。
- * 專案裡原本用的 amber（暖橘）與 purple（紫）色階，在這裡整組換成粉彩版本，
- * 這樣所有既有畫面一次就換好，不用逐檔修改。
+ * 全站只用 sky（主色）與 pink（強調色）；不再有舊配色的覆寫。
  */
 :root {
   --background: #eaf6ff;
@@ -18,31 +17,6 @@
 }
 
 @theme {
-  /* amber → 天空藍 */
-  --color-amber-50: #f2faff;
-  --color-amber-100: #e0f2fe;
-  --color-amber-200: #bfe6fb;
-  --color-amber-300: #93d3f5;
-  --color-amber-400: #62bcee;
-  --color-amber-500: #3ea5e6;
-  --color-amber-600: #2b8ed1;
-  --color-amber-700: #2373b0;
-  --color-amber-800: #1f5a8c;
-  --color-amber-900: #1c4a73;
-  --color-amber-950: #12304b;
-
-  /* purple → 薰衣草粉藍 */
-  --color-purple-50: #f6f3ff;
-  --color-purple-100: #ebe5ff;
-  --color-purple-200: #dacfff;
-  --color-purple-300: #c3b2fb;
-  --color-purple-400: #a994f2;
-  --color-purple-500: #8f78e4;
-  --color-purple-600: #7a62d0;
-  --color-purple-700: #664eb0;
-  --color-purple-800: #523f8c;
-  --color-purple-900: #40326c;
-
   /* 柔和的藍色陰影 */
   --shadow-sm: 0 2px 6px rgba(80, 140, 200, 0.16);
   --shadow-md: 0 6px 16px rgba(80, 140, 200, 0.2);

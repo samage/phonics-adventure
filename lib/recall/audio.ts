@@ -17,7 +17,7 @@ import {
 } from '@/lib/scrSupplementAudio';
 import { cancelSpeech, playAudioFile } from '@/lib/speech';
 
-export const SLOW_RATE = 0.6;
+const SLOW_RATE = 0.6;
 
 /** 回傳單一音檔的網址；blend（多個音檔）或找不到時回傳 null */
 export function resolveRecallAudioUrl(audio: string): string | null {

@@ -26,7 +26,3 @@ export function isTrickyWord(word: string): boolean {
 export function getTrickyWord(word: string): TrickyWord | null {
   return TRICKY_WORDS.find((t) => t.word === word.toLowerCase()) ?? null;
 }
-
-export function trickyWordsForPhase(phase: number): TrickyWord[] {
-  return TRICKY_WORDS.filter((t) => t.phaseIntroduced <= phase);
-}

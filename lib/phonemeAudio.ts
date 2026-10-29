@@ -55,7 +55,7 @@ const UNAMBIGUOUS_SUPPLEMENT = new Set([
  * 依積木的拼法、類型與音素，解析應播放的檔名（不含副檔名）。
  * supplement .ogg 優先於 SCR .mp3。
  */
-export function resolveSoundcityFileName(block: PhonicsBlock): string | null {
+function resolveSoundcityFileName(block: PhonicsBlock): string | null {
   const text = block.text.toLowerCase();
   const phoneme = normPhoneme(block.phoneme);
 
