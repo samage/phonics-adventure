@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { fireConfetti } from '@/components/ConfettiBurst';
 import WordPhonicsLab from '@/components/phonics/WordPhonicsLab';
 import { BTN_SECONDARY } from '@/components/ui/PageHeader';
 import { speakWord } from '@/lib/speech';
@@ -32,7 +31,6 @@ export default function DecodableSentenceLesson({
       setSentenceIndex((i) => i + 1);
       setWordIndex(0);
     } else {
-      fireConfetti();
       onComplete();
     }
   };

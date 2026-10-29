@@ -7,8 +7,7 @@ import { findLesson } from '@/types/curriculum';
 import { CURRICULUM, resolveLessonId } from '@/data/curriculum';
 import { useProgress } from '@/lib/progress';
 import LessonFlow from '@/components/learn/LessonFlow';
-import SightWordLesson from '@/components/learn/SightWordLesson';
-import DecodableSentenceLesson from '@/components/learn/DecodableSentenceLesson';
+import TextLessonFlow from '@/components/learn/TextLessonFlow';
 import Mascot from '@/components/mascot/Mascot';
 import PageHeader, { BTN_PRIMARY } from '@/components/ui/PageHeader';
 
@@ -29,7 +28,7 @@ export default function LessonPage() {
   const params = useParams<{ lessonId: string }>();
   const lessonId = resolveLessonId(params.lessonId);
   const lesson = findLesson(CURRICULUM, lessonId);
-  const { hydrated, isLessonUnlocked, completeLesson, setCurrentLesson } = useProgress();
+  const { hydrated, isLessonUnlocked, setCurrentLesson } = useProgress();
 
   useEffect(() => {
     if (lesson) setCurrentLesson(lesson.id);
@@ -63,14 +62,8 @@ export default function LessonPage() {
       {content.kind === 'grapheme' && (
         <LessonFlow key={lesson.id} lesson={lesson} content={content} />
       )}
-      {content.kind === 'sight_word' && (
-        <SightWordLesson words={content.words} onComplete={() => completeLesson(lesson.id)} />
-      )}
-      {content.kind === 'decodable_sentences' && (
-        <DecodableSentenceLesson
-          sentences={content.sentences}
-          onComplete={() => completeLesson(lesson.id)}
-        />
+      {(content.kind === 'sight_word' || content.kind === 'decodable_sentences') && (
+        <TextLessonFlow key={lesson.id} lesson={lesson} content={content} />
       )}
     </main>
   );

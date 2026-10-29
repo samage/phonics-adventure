@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { fireConfetti } from '@/components/ConfettiBurst';
 import MascotSays from '@/components/mascot/MascotSays';
 import { BTN_PRIMARY, BTN_SECONDARY } from '@/components/ui/PageHeader';
 import { getTrickyWord } from '@/data/trickyWords';
@@ -21,7 +20,6 @@ export default function SightWordLesson({ words, onComplete }: SightWordLessonPr
     if (index < words.length - 1) {
       setIndex((i) => i + 1);
     } else {
-      fireConfetti();
       onComplete();
     }
   };

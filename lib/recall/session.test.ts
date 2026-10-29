@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { RECALL_ITEMS } from '@/data/recall/items';
+import { TEXT_ITEMS } from '@/data/recall/textItems';
 import { seededRng } from './quiz';
 import { NEW_PER_SESSION, SESSION_SIZE, pickRecallSession } from './session';
 import type { ReviewMap } from '@/lib/review/scheduler';
@@ -41,5 +42,22 @@ describe('pickRecallSession', () => {
 
   it('沒有候選項目就回傳空陣列', () => {
     expect(pickRecallSession({}, [], TODAY, seededRng(5))).toEqual([]);
+  });
+
+  it('字母、特殊字、短句可以混在同一輪：到期的文字項目一樣優先', () => {
+    const candidates = [...RECALL_ITEMS.slice(0, 20), ...TEXT_ITEMS];
+    const review: ReviewMap = { 'w:the': rec(2, TODAY), 's:L20:1': rec(1, '2026-10-01') };
+    const picked = pickRecallSession(review, candidates, TODAY, seededRng(6));
+    const ids = picked.map((p) => p.id);
+    expect(ids).toContain('w:the');
+    expect(ids).toContain('s:L20:1');
+    expect(new Set(ids).size).toBe(ids.length);
+    expect(picked.length).toBeLessThanOrEqual(SESSION_SIZE);
+  });
+
+  it('只有文字候選時也能出一輪', () => {
+    const picked = pickRecallSession({}, TEXT_ITEMS, TODAY, seededRng(7));
+    expect(picked.length).toBeGreaterThan(0);
+    expect(picked.every((p) => 'kind' in p)).toBe(true);
   });
 });

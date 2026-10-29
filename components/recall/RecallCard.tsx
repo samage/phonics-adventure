@@ -4,6 +4,7 @@ import { useState } from 'react';
 import type { RecallItem } from '@/data/recall/items';
 import { speakWord } from '@/lib/speech';
 import Mascot from '@/components/mascot/Mascot';
+import RateButtons from './RateButtons';
 import SoundPlayButtons from './SoundPlayButtons';
 
 interface RecallCardProps {
@@ -71,22 +72,7 @@ export default function RecallCard({ item, index, total, onRate }: RecallCardPro
         )}
       </div>
 
-      <div className="grid w-full grid-cols-2 gap-3">
-        <button
-          type="button"
-          onClick={() => onRate(false)}
-          className="rounded-3xl bg-pink-100 px-4 py-4 text-xl text-pink-700 shadow-[0_5px_0_0_#f3b6ca] transition-transform active:translate-y-1 active:shadow-[0_1px_0_0_#f3b6ca]"
-        >
-          🌱 還不會
-        </button>
-        <button
-          type="button"
-          onClick={() => onRate(true)}
-          className="rounded-3xl bg-sky-400 px-4 py-4 text-xl text-white shadow-[0_5px_0_0_#2f8fd0] transition-transform active:translate-y-1 active:shadow-[0_1px_0_0_#2f8fd0]"
-        >
-          ✋ 我會！
-        </button>
-      </div>
+      <RateButtons onRate={onRate} />
     </div>
   );
 }

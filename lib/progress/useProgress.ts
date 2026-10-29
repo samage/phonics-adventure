@@ -38,8 +38,8 @@ export function useProgress() {
     [store],
   );
 
-  const recordGraphemeOutcome = useCallback(
-    (itemId: string, outcome: ReviewOutcome) => store.recordGraphemeOutcome(itemId, outcome),
+  const recordOutcome = useCallback(
+    (itemId: string, outcome: ReviewOutcome) => store.recordOutcome(itemId, outcome),
     [store],
   );
 
@@ -77,7 +77,7 @@ export function useProgress() {
     hydrated,
     completeLesson,
     setCurrentLesson,
-    recordGraphemeOutcome,
+    recordOutcome,
     applyPlacementResult,
     isLessonCompleted,
     isLessonUnlocked,

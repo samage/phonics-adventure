@@ -2,7 +2,6 @@ import type { Lesson, UnitId } from '@/types/curriculum';
 import type { UserProgress } from '@/types/progress';
 import {
   applyOutcome,
-  dueCount as countDue,
   dueIds,
   todayString,
   type ReviewOutcome,
@@ -11,6 +10,7 @@ import { applyPlacementToReview, type PlacementResult } from '@/lib/placement/pl
 import { CURRICULUM, getAllLessons } from '@/data/curriculum';
 import { getPlayableLessons } from '@/types/curriculum';
 import { DEV_UNLOCK_ALL_LESSONS } from '@/lib/devConfig';
+import { isKnownReviewId } from '@/lib/recall/reviewQuiz';
 
 function cloneProgress(p: UserProgress): UserProgress {
   return {
@@ -96,8 +96,11 @@ export function applyCompleteLesson(
   return next;
 }
 
-/** 孩子對某個字母／字母組合的一次作答（看字說音自評、小測驗、複習、拼字錯誤） */
-export function applyGraphemeOutcome(
+/**
+ * 孩子對某個複習項目（字母、特殊字、短句）的一次作答
+ * （自評、小測驗、複習、拼字錯誤）。所有項目共用同一份複習表。
+ */
+export function applyReviewOutcome(
   progress: UserProgress,
   itemId: string,
   outcome: ReviewOutcome,
@@ -127,14 +130,16 @@ export function applyPlacement(
   return next;
 }
 
-export function getDueCount(progress: UserProgress, today: string = todayString()): number {
-  return countDue(progress.review, today);
-}
-
+/** 今天到期的項目 id（只算現行課程裡存在的項目，舊資料裡找不到的 id 不會讓數字對不上） */
 export function getDueIds(
   progress: UserProgress,
   today: string = todayString(),
   limit?: number,
 ): string[] {
-  return dueIds(progress.review, today, limit);
+  const ids = dueIds(progress.review, today).filter(isKnownReviewId);
+  return limit === undefined ? ids : ids.slice(0, limit);
+}
+
+export function getDueCount(progress: UserProgress, today: string = todayString()): number {
+  return getDueIds(progress, today).length;
 }

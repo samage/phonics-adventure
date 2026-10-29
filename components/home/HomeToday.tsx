@@ -35,7 +35,7 @@ export default function HomeToday() {
           <Pudding size={56} className="shrink-0" />
           <div className="flex-1 text-left">
             <p className="text-2xl">今天複習</p>
-            <p className="text-sm text-white/90">有 {dueToday} 個字母要再看一次，馬上說說看 🔊</p>
+            <p className="text-sm text-white/90">有 {dueToday} 個字、句子要再看一次，馬上說說看 🔊</p>
           </div>
           <span
             aria-label={`${dueToday} 個待複習`}

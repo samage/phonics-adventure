@@ -2,30 +2,36 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { getRecallItem, type RecallItem } from '@/data/recall/items';
-import { learnedItems } from '@/lib/learn/lessonItems';
+import { learnedItems, learnedTextItems } from '@/lib/learn/lessonItems';
 import { useProgress } from '@/lib/progress';
-import { buildQuiz, makeQuestion, type QuizMode, type QuizQuestion } from '@/lib/recall/quiz';
+import {
+  buildReviewQuiz,
+  getReviewItem,
+  retryQuestion,
+  type QuizPools,
+  type ReviewItem,
+  type ReviewQuestion,
+} from '@/lib/recall/reviewQuiz';
 import { pickRecallSession } from '@/lib/recall/session';
 import { todayString } from '@/lib/review/scheduler';
 import Mascot from '@/components/mascot/Mascot';
 import MascotSays from '@/components/mascot/MascotSays';
 import PageHeader, { BTN_PRIMARY, BTN_SECONDARY } from '@/components/ui/PageHeader';
 import { fireConfetti } from '@/components/ConfettiBurst';
-import QuizPlayer from './QuizPlayer';
+import QuestionPlayer from './QuestionPlayer';
 import RecallRound, { type RoundResult } from './RecallRound';
 
 /** 一次複習最多幾個，避免孩子累了 */
 const REVIEW_LIMIT = 10;
 
 interface Entry {
-  question: QuizQuestion;
+  question: ReviewQuestion;
   retry: boolean;
 }
 
 /**
- * 今天複習：先把到期的項目一題一題複習完（答錯會換題型重考），
- * 之後（或今天沒有到期項目時）可以「多練一輪看字說音」——從學過的字母裡挑，
+ * 今天複習：先把到期的項目（字母、特殊字、短句）一題一題複習完（答錯會換題型重考），
+ * 之後（或今天沒有到期項目時）可以「多練一輪看字說說看」——從學過的項目裡挑，
  * 兩者都寫進同一份 Leitner 複習表。
  */
 export default function ReviewFlow() {
@@ -58,12 +64,17 @@ export default function ReviewFlow() {
 }
 
 function DueQueue({ onAgain, onPractice }: { onAgain: () => void; onPractice: () => void }) {
-  const { dueTodayIds, recordGraphemeOutcome } = useProgress();
+  const { progress, dueTodayIds, recordOutcome } = useProgress();
+  // 特殊字／短句題的干擾選項只用學過的；字母題維持原本的做法（全部字母）
+  const [pools] = useState<QuizPools>(() => ({ text: learnedTextItems(progress) }));
   const [queue, setQueue] = useState<Entry[]>(() => {
     const items = dueTodayIds(REVIEW_LIMIT)
-      .map((id) => getRecallItem(id))
-      .filter((it): it is RecallItem => it !== null);
-    return buildQuiz(items).map((question) => ({ question, retry: false }));
+      .map((id) => getReviewItem(id))
+      .filter((it): it is ReviewItem => it !== null);
+    return buildReviewQuiz(items, Math.random, pools).map((question) => ({
+      question,
+      retry: false,
+    }));
   });
   const [index, setIndex] = useState(0);
   const [started] = useState(queue.length);
@@ -75,7 +86,7 @@ function DueQueue({ onAgain, onPractice }: { onAgain: () => void; onPractice: ()
       <div className="flex w-full max-w-md flex-col items-center gap-5">
         <PageHeader title="今天複習" />
         <Mascot mood="sleepy" size={150} />
-        <MascotSays mood="happy">今天沒有到期要複習的了！想多練的話，可以再看字母說說音～</MascotSays>
+        <MascotSays mood="happy">今天沒有到期要複習的了！想多練的話，可以再多唸一輪～</MascotSays>
         <div className="flex gap-3">
           <button type="button" onClick={onPractice} className={BTN_PRIMARY}>
             多練一輪
@@ -120,7 +131,7 @@ function DueQueue({ onAgain, onPractice }: { onAgain: () => void; onPractice: ()
   return (
     <div className="flex w-full flex-col items-center gap-5">
       <PageHeader title="今天複習" />
-      <QuizPlayer
+      <QuestionPlayer
         key={`${entry.question.itemId}-${entry.retry ? 'r' : 'n'}`}
         question={entry.question}
         index={index}
@@ -130,20 +141,22 @@ function DueQueue({ onAgain, onPractice }: { onAgain: () => void; onPractice: ()
           if (entry.retry) {
             // 同一輪錯後重考：不升級，只是給孩子再成功一次的機會
             if (correct) setFixed((n) => n + 1);
-            recordGraphemeOutcome(entry.question.itemId, 'keep');
+            recordOutcome(entry.question.itemId, 'keep');
             return;
           }
-          recordGraphemeOutcome(entry.question.itemId, correct ? 'right' : 'wrong');
+          recordOutcome(entry.question.itemId, correct ? 'right' : 'wrong');
           setFirstTry((s) => ({
             right: s.right + (correct ? 1 : 0),
             wrong: s.wrong + (correct ? 0 : 1),
           }));
           if (!correct) {
-            const item = getRecallItem(entry.question.itemId);
+            const item = getReviewItem(entry.question.itemId);
             if (item) {
-              // 換一種題型再問一次
-              const otherMode: QuizMode = entry.question.mode === 'sound' ? 'word' : 'sound';
-              setQueue((q) => [...q, { question: makeQuestion(item, otherMode), retry: true }]);
+              // 換一種題型（短句換一個空格）再問一次
+              setQueue((q) => [
+                ...q,
+                { question: retryQuestion(item, entry.question, Math.random, pools), retry: true },
+              ]);
             }
           }
         }}
@@ -155,8 +168,12 @@ function DueQueue({ onAgain, onPractice }: { onAgain: () => void; onPractice: ()
 
 function ExtraRound({ onAgain, onBack }: { onAgain: () => void; onBack: () => void }) {
   const { progress } = useProgress();
-  const [items] = useState<RecallItem[]>(() =>
-    pickRecallSession(progress.review, learnedItems(progress), todayString()),
+  const [items] = useState<ReviewItem[]>(() =>
+    pickRecallSession(
+      progress.review,
+      [...learnedItems(progress), ...learnedTextItems(progress)],
+      todayString(),
+    ),
   );
   const [result, setResult] = useState<RoundResult | null>(null);
 
@@ -165,7 +182,7 @@ function ExtraRound({ onAgain, onBack }: { onAgain: () => void; onBack: () => vo
       <div className="flex w-full max-w-md flex-col items-center gap-5">
         <PageHeader title="多練一輪" backHref="/review" backLabel="← 今天複習" />
         <Mascot mood="sleepy" size={150} />
-        <MascotSays mood="happy">還沒有學過的字母可以練。先去首頁上第一課吧！</MascotSays>
+        <MascotSays mood="happy">還沒有學過的字、句子可以練。先去首頁上第一課吧！</MascotSays>
         <Link href="/" className={BTN_PRIMARY}>
           去上課
         </Link>
@@ -183,7 +200,7 @@ function ExtraRound({ onAgain, onBack }: { onAgain: () => void; onBack: () => vo
         </p>
         <p className="text-center text-lg text-sky-800">
           {result.weakIds.length > 0
-            ? `有 ${result.weakIds.length} 個「還不會」的字母已經放進今天複習，多聽幾次就會了！`
+            ? `有 ${result.weakIds.length} 個「還不會」的項目已經放進今天複習，多聽幾次就會了！`
             : '每個都很熟，明天再來看看有沒有忘記～'}
         </p>
         <div className="flex flex-wrap justify-center gap-3">
@@ -203,10 +220,10 @@ function ExtraRound({ onAgain, onBack }: { onAgain: () => void; onBack: () => vo
 
   return (
     <div className="flex w-full flex-col items-center gap-5">
-      <PageHeader title="多練一輪：看字說音" backHref="/review" backLabel="← 今天複習" />
+      <PageHeader title="多練一輪：看字說說看" backHref="/review" backLabel="← 今天複習" />
       <RecallRound
         items={items}
-        pool={learnedItems(progress)}
+        pools={{ grapheme: learnedItems(progress), text: learnedTextItems(progress) }}
         onDone={(r) => {
           setResult(r);
           fireConfetti();

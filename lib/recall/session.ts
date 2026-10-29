@@ -5,7 +5,6 @@
  * 避免一次塞太多）→ ③ 還沒學穩（盒子 < 4）的項目補滿。
  */
 
-import type { RecallItem } from '@/data/recall/items';
 import { isDue, type ReviewMap } from '@/lib/review/scheduler';
 import { shuffled, type Rng } from './quiz';
 
@@ -13,15 +12,16 @@ export const SESSION_SIZE = 8;
 export const NEW_PER_SESSION = 5;
 
 /**
- * @param candidates 可以出現在這一輪的項目（通常是「已學過」的項目，見 learnedItems）
+ * @param candidates 可以出現在這一輪的項目（通常是「已學過」的項目，見 learnedItems／learnedTextItems；
+ *   字母、特殊字、短句都可以，共用同一個複習表）
  */
-export function pickRecallSession(
+export function pickRecallSession<T extends { id: string }>(
   review: ReviewMap,
-  candidates: readonly RecallItem[],
+  candidates: readonly T[],
   today: string,
   rng: Rng = Math.random,
   size: number = SESSION_SIZE,
-): RecallItem[] {
+): T[] {
   const pool = candidates;
   const due = pool.filter((it) => review[it.id] && isDue(review[it.id], today));
   const fresh = pool.filter((it) => !review[it.id]).slice(0, NEW_PER_SESSION);
@@ -29,9 +29,9 @@ export function pickRecallSession(
     (it) => review[it.id] && !isDue(review[it.id], today) && (review[it.id]?.box ?? 5) < 4,
   );
 
-  const picked: RecallItem[] = [];
+  const picked: T[] = [];
   const seen = new Set<string>();
-  const take = (list: RecallItem[]) => {
+  const take = (list: T[]) => {
     for (const it of list) {
       if (picked.length >= size) return;
       if (seen.has(it.id)) continue;

@@ -50,7 +50,7 @@ interface LessonFlowProps {
  * 「看字說音」寫進 Leitner 複習表，所以學完的字母明天會自動出現在「今天複習」。
  */
 export default function LessonFlow({ lesson, content }: LessonFlowProps) {
-  const { progress, completeLesson, recordGraphemeOutcome } = useProgress();
+  const { progress, completeLesson, recordOutcome } = useProgress();
   const items = useMemo(() => recallItemsForLesson(lesson), [lesson]);
   const [pool] = useState(() => quizPoolForLesson(lesson, progress.review));
   const words = content.words;
@@ -128,7 +128,7 @@ export default function LessonFlow({ lesson, content }: LessonFlowProps) {
         {stepper}
         <RecallRound
           items={items}
-          pool={pool}
+          pools={{ grapheme: pool }}
           onDone={(r) => {
             setRecallResult(r);
             goAfter('recall');
@@ -171,7 +171,7 @@ export default function LessonFlow({ lesson, content }: LessonFlowProps) {
         {stepper}
         <SpellingGame
           words={words}
-          onMistake={(id) => recordGraphemeOutcome(id, 'wrong')}
+          onMistake={(id) => recordOutcome(id, 'wrong')}
           onComplete={() => goAfter('spelling')}
         />
       </div>

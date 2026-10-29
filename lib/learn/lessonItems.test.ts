@@ -1,14 +1,19 @@
 import { describe, expect, it } from 'vitest';
 import { PHONICS_LESSONS } from '@/data/curriculum';
 import { RECALL_ITEMS } from '@/data/recall/items';
+import { TEXT_ITEMS } from '@/data/recall/textItems';
 import { createDefaultProgress } from '@/types/progress';
 import {
   MIN_QUIZ_POOL,
   learnedItems,
+  learnedTextItems,
   lessonDueCount,
   lessonIdForRecallItem,
   quizPoolForLesson,
+  quizTextPoolForLesson,
   recallItemsForLesson,
+  reviewItemsForLesson,
+  textItemsForLesson,
 } from './lessonItems';
 
 const lesson = (id: string) => PHONICS_LESSONS.find((l) => l.id === id)!;
@@ -125,5 +130,59 @@ describe('lessonDueCount', () => {
     };
     expect(lessonDueCount(lesson('L01'), review, '2026-10-29')).toBe(1);
     expect(lessonDueCount(lesson('L02'), review, '2026-10-29')).toBe(0);
+  });
+});
+
+describe('特殊字／短句課的複習項目', () => {
+  it('特殊字課 → 該課的字；短句課 → 該課的每一句；字母課 → 沒有', () => {
+    expect(ids(textItemsForLesson(lesson('L21')))).toEqual(['w:the', 'w:said', 'w:was']);
+    expect(ids(textItemsForLesson(lesson('L20')))).toEqual(['s:L20:0', 's:L20:1', 's:L20:2']);
+    expect(textItemsForLesson(lesson('L01'))).toEqual([]);
+    expect(ids(reviewItemsForLesson(lesson('L01')))).toEqual(['s']);
+    expect(ids(reviewItemsForLesson(lesson('L21')))).toEqual(['w:the', 'w:said', 'w:was']);
+  });
+
+  it('每個特殊字課、短句課都至少有一個項目，且每個項目都能反查到課', () => {
+    for (const l of PHONICS_LESSONS) {
+      const type = l.activities[0]?.type;
+      if (type === 'sight_word' || type === 'decodable_sentences') {
+        expect(textItemsForLesson(l).length, l.id).toBeGreaterThan(0);
+      }
+    }
+    for (const t of TEXT_ITEMS) expect(lessonIdForRecallItem(t.id)).toBe(t.lessonId);
+  });
+
+  it('learnedTextItems：完成的課教的項目 + 複習表已有紀錄的；分班測驗不會讓它們全部解鎖', () => {
+    expect(learnedTextItems(createDefaultProgress())).toEqual([]);
+    const p = {
+      ...createDefaultProgress(),
+      completedLessons: ['L21'],
+      review: { 's:L20:0': { box: 1 as const, due: '2026-10-29', seen: 1, right: 0, wrong: 1 } },
+      placement: { takenAt: '2026-10-29T00:00:00.000Z', knownIds: [], missedIds: [], startTier: null },
+    };
+    expect(ids(learnedTextItems(p)).sort()).toEqual(['s:L20:0', 'w:said', 'w:the', 'w:was']);
+  });
+
+  it('quizTextPoolForLesson：這一課以前（含這一課）教的 + 複習表已有的，不含還沒教的', () => {
+    const pool = ids(quizTextPoolForLesson(lesson('L21'), {}));
+    expect(pool).toEqual(expect.arrayContaining(['w:the', 'w:said', 'w:was', 's:L20:0']));
+    expect(pool).not.toContain('w:they');
+    expect(pool).not.toContain('s:L60:0');
+    const withReview = ids(
+      quizTextPoolForLesson(lesson('L21'), {
+        'w:they': { box: 3, due: '2026-11-01', seen: 1, right: 1, wrong: 0 },
+      }),
+    );
+    expect(withReview).toContain('w:they');
+  });
+
+  it('lessonDueCount 也會算特殊字課、短句課的項目', () => {
+    const review = {
+      'w:the': { box: 1 as const, due: '2026-10-29', seen: 1, right: 0, wrong: 1 },
+      'w:said': { box: 3 as const, due: '2026-11-05', seen: 1, right: 1, wrong: 0 },
+      's:L20:2': { box: 2 as const, due: '2026-10-28', seen: 1, right: 1, wrong: 0 },
+    };
+    expect(lessonDueCount(lesson('L21'), review, '2026-10-29')).toBe(1);
+    expect(lessonDueCount(lesson('L20'), review, '2026-10-29')).toBe(1);
   });
 });

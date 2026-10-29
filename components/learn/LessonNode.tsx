@@ -45,7 +45,7 @@ export default function LessonNode({ lesson, isCurrent = false }: LessonNodeProp
     );
   }
 
-  // 這一課教過的字母，今天有幾個到期 → 小鈴鐺提醒
+  // 這一課教過的項目（字母、特殊字、短句），今天有幾個到期 → 小鈴鐺提醒
   const due = completed ? lessonDueCount(lesson, progress.review, todayString()) : 0;
 
   const stateClasses = completed
@@ -65,7 +65,7 @@ export default function LessonNode({ lesson, isCurrent = false }: LessonNodeProp
       </div>
       {due > 0 && (
         <span
-          title={`${due} 個字母今天要複習`}
+          title={`${due} 個項目今天要複習`}
           className="rounded-full bg-pink-300 px-2 py-0.5 text-sm text-white"
         >
           🔔 {due}

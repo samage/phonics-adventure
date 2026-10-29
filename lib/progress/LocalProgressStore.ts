@@ -7,7 +7,7 @@ import type { ReviewOutcome } from '@/lib/review/scheduler';
 import type { PlacementResult } from '@/lib/placement/placement';
 import {
   applyCompleteLesson,
-  applyGraphemeOutcome,
+  applyReviewOutcome,
   applyPlacement,
 } from './logic';
 import { loadProgress } from './migrate';
@@ -73,9 +73,9 @@ export class LocalProgressStore {
     };
   }
 
-  /** 對某個字母／字母組合的一次作答，不論來自哪個活動，都寫進同一份複習表 */
-  recordGraphemeOutcome(itemId: string, outcome: ReviewOutcome): void {
-    this.progress = applyGraphemeOutcome(this.progress, itemId, outcome);
+  /** 對某個複習項目（字母、特殊字、短句）的一次作答，不論來自哪個活動，都寫進同一份複習表 */
+  recordOutcome(itemId: string, outcome: ReviewOutcome): void {
+    this.progress = applyReviewOutcome(this.progress, itemId, outcome);
   }
 
   applyPlacementResult(result: PlacementResult): void {
